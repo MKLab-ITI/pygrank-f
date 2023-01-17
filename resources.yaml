@@ -1,0 +1,20 @@
+---
+  citeseer:
+    url: https://linqs.soe.ucsc.edu/data
+    download:
+      - https://linqs-data.soe.ucsc.edu/public/lbc/citeseer.tgz
+    untar:
+      - citeseer.tgz
+    pairs:
+      file: citeseer/citeseer.cites
+    groups:
+      file: citeseer/citeseer.content
+      process: 0 -1
+    remove:
+      - citeseer/
+
+  highschool:
+    url: http://www.sociopatterns.org/datasets/high-school-contact-and-friendship-networks
+    download:
+      - http://www.sociopatterns.org/wp-content/uploads/2015/07/Facebook-known-pairs_data_2013.csv.gz
+      - http://www.sociopatterns.org/wp-content/uploads/2015/09/metadata_2013.txt
