@@ -1,6 +1,7 @@
 # pygrank-f
 
-This is an experimental forward-oriented programming 
+This is an experimental 
+[forward-oriented programming](https://github.com/maniospas/pyfop) 
 variation of [pygrank](https://github.com/MKLab-ITI/pygrank);
 a package for node ranking in large graphs.
 `pygrank-f` provides a simpler interface on top of the
@@ -15,7 +16,7 @@ interface of the source package.
 :rocket: Fast processing<br>
 :cookie: Easy to use<br>
 :jigsaw: Modular interface<br>
-:dna: Interlaced<br>
+:dna: Organic backpropagation<br>
 
 ## Quickstart
 Graph filters are called via `pygrankf.steps` interface
@@ -55,10 +56,10 @@ can be declared by setting the appropriate parameters. You
 can see all parameters you can set by calling `.get_input_context()`
 instead of `.call()`.
 
-You might want to generate a data preprocessing scheme to
-satisfy some objective, such as making node ranking
-fairness-aware. In this case, you can define the 
-prior construction scheme in the first step, like this:
+You might want to define parameterized data preprocessing 
+to be tuned on some objective, such as making node ranking
+fairness-aware. It suffices for this definition to
+produce the first step like this:
 
 ```python
 original = pgf.pagerank(train).call(spectrum="symmetric")  # power method implementation of pagerank 
@@ -70,9 +71,12 @@ fair_result = pgf.steps(
 ).call(spectrum="symmetric")  # theoretical results only for symmetric spectrums
 ```
 
-The above code generates an arbitrary neural graph
-filter prior generation scheme that are used in an
-objective definition. Note that the optimizer is 
-`pgf.tfsgd`, which the package provides to run on
-tensorflow and perform fewer algorithm re-runs
-compared to its default blackbox optimization algorithm.
+The above snippet sets up a neural graph
+filter prior generation scheme, which takes any number
+of graph signals to account for - typically those
+used to define the `metric` objective. 
+The optimizer this time is 
+`pgf.tfsgd`, which the package provides as 
+an alternative to its own default blackbox optimization.
+This requires comparatively few algorithm reruns
+for convex objectives via tensorflow's autograd.
