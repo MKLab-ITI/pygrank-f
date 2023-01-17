@@ -10,7 +10,9 @@ capabilities. New features successfully developed in this
 repository will be eventually fleshed out in the
 interface of the source package.
 
+**Dependencies:** `pyfop`
 **Development:** Emmanouil (Manios) Krasanakis
+**Contant:** maniospas@hotmail.com
 
 :cd: Large graphs<br>
 :rocket: Fast processing<br>
