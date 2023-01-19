@@ -1,5 +1,6 @@
 from timeit import default_timer as time
 from pygrankf.core import backend, BackendPrimitive
+from pygrankf.measures import mabs
 from pyfop import *
 
 
@@ -20,7 +21,7 @@ class Convergence:
     def __init__(self,
                  tol: float = 1.E-6,
                  errortype: str = "iters",
-                 maxiters: int = 100):
+                 maxiters: int = 20):
         """
         Initializes a convergence manager with a provided tolerance level, error type and number of iterations.
 
@@ -82,7 +83,7 @@ class Convergence:
     def _has_converged(self, prev_ranks: BackendPrimitive, ranks: BackendPrimitive) -> bool:
         if self.error_type == "iters":
             return False
-        return self.error_type(prev_ranks)(ranks) <= max(self.tol, backend.epsilon())
+        return self.error_type(prev_ranks, ranks) <= max(self.tol, backend.epsilon())
 
     def __str__(self):
         return str(self.iteration)+" iterations ("+str(self.elapsed_time)+" sec)"

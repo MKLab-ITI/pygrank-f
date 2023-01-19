@@ -1,0 +1,50 @@
+---
+  - name: diffusion fairness
+    datasets:
+      - name: polbooks
+        communities:
+          sensitive: 2
+      - name: polblogs
+        communities:
+          sensitive: 1
+    community:
+      splits:
+        - name: 2 examples
+          variables:
+            train: 2
+            exclude: None
+      metrics:
+        - name: mabs
+          args:
+            - base
+            - run
+        - name: prule
+          args:
+            - sensitive
+            - run
+
+  - name: diffusion fairness (evaluate on non-training)
+    datasets:
+      - name: polbooks
+        communities:
+          sensitive: 2
+      - name: polblogs
+        communities:
+          sensitive: 1
+    community:
+      splits:
+        - name: 2 examples
+          variables:
+            train: 2
+            exclude: train # used to exclude the train split in metrics
+      metrics:
+        - name: mabs
+          args:
+            - base    # the result of "base" algorithm
+            - run     # the result of the run for each algorithm
+            - exclude # from the community split
+        - name: prule
+          args:
+            - sensitive # the sensitive community defined in the dataset
+            - run       # the result of the run for each algorithm
+            - exclude   # from the community split

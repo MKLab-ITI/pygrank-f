@@ -72,8 +72,8 @@ class GraphSignal(MutableMapping):
             #exclude = set([key for key, value in to_signal(self, exclude).items() if value != 0])
             #ret = backend.to_array([self[key] for key in self.graph if key not in exclude])
             exclude = to_signal(self, exclude)
-            return backend.filter_out(self._np, exclude._np)
-        return self._np
+            return backend.filter_out(self.np, exclude._np)
+        return self.np
 
     def __rshift__(self, other):
         return other(self)
@@ -87,7 +87,7 @@ class GraphSignal(MutableMapping):
         self._np = backend.to_array(self.__compliant_value(value))
 
     def __getitem__(self, key):
-        return float(self._np[self.node2id[key]])
+        return self._np[self.node2id[key]]
 
     def __setitem__(self, key, value):
         self._np[self.node2id[key]] = float(value)
@@ -204,6 +204,7 @@ class GraphSignal(MutableMapping):
             training = int(len(group)*training)
         else:
             training = int(training)
+        assert 0 < training < len(group)
         return to_signal(self, {v: self[v] for v in group[:training]}), to_signal(self, {v: self[v] for v in group[training:]})
 
 

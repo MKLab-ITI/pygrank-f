@@ -16,7 +16,7 @@ def culep(personalization, result, sensitive,
     return ret * culept + personalization*(1-culept)
 
 
-def neural(*inputs, layers=3):
+def neural(*inputs, layers=3, parameter_range=(-100, 100)):
     input_dims = len(inputs)
     shapes = [(input_dims, input_dims+2)] + [(input_dims+2, input_dims+2) for _ in range(layers-2)] + [(input_dims+2, 1)]
     num_params = sum([shape[0]*shape[1]+shape[1] for shape in shapes])
@@ -26,9 +26,9 @@ def neural(*inputs, layers=3):
             first_params.append(0)
         for i in range(shape[0]):
             for j in range(shape[1]):
-                first_params.append(0.5)#(random())*12**0.5/shape[1])
+                first_params.append(6**0.5/shape[1])#(random())*12**0.5/shape[1])
     first_params.reverse()
-    tunable = Tunable([0]*num_params, [1]*num_params, first_params)
+    tunable = Tunable([parameter_range[0]]*num_params, [parameter_range[1]]*num_params, first_params)
 
     @lazy_no_cache
     @autoaspects

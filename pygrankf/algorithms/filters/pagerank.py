@@ -26,6 +26,7 @@ class PageRank(Iterable[float]):
 @autoaspects
 def pagerank(personalization, alpha=0.85, normalize=reweigh, convergence=Convergence()):
     normalized_adjacency = normalize(personalization.graph)
+    personalization = personalization/backend.sum(personalization)
     result = personalization
     convergence.start()
     while not convergence.has_converged(result):

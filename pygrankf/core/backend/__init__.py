@@ -65,6 +65,7 @@ def load_backend(mod_name):
                                     if name not in M.cors:
                                         backendM = scipy_sparse_to_backend(M.cors["numpy"])
                                         backendM.cors = M.cors
+                                        backendM.cors[name] = backendM
                                     M = M.cors[name]
                                 if x.__class__.__name__ == "GraphSignal":
                                     return to_signal(x, method(x.np, M))

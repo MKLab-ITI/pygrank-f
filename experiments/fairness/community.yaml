@@ -1,0 +1,45 @@
+---
+  - name: fair community recommendation
+    datasets:
+      - name: pokec
+        min_members: 20
+        skip: True
+        communities:
+          sensitive: gender
+      - name: facebook01
+        min_members: 20
+        skip: True
+        communities:
+          sensitive: 1
+      - name: highschool
+        min_members: 20
+        communities:
+          ignore: M
+          sensitive: F
+    community:
+      splits:
+        - name: find 5
+          seed: 0
+          skip: True
+          variables:
+            train: -5
+            test: Remaining
+            exclude: None
+        - name: 50%
+          seed: 0
+          variables:
+            train: 0.5
+            test: Remaining
+            exclude: None
+      metrics:
+        - name: auc
+          args:
+            - test
+            - run
+            - train
+        - name: prule
+          args:
+            - sensitive
+            - run
+      summary:
+        - mean
