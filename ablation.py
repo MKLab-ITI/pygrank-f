@@ -83,4 +83,5 @@ def run(train, exclude, sensitive, **kwargs):
 
 pgf.benchmark("https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/fairness/test.yaml",
               "experiments/algorithms/ablation.yaml",
+              update=True,
               delim="&", endl="\\\\\n")

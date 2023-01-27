@@ -22,7 +22,7 @@ def benchmark(settings: Union[str, dict], run, update=False, **kwargs):
     import pygrankf as pgf
 
     if isinstance(run, str) or isinstance(run, dict):
-        run = pgf.experiments(run)
+        run = pgf.experiments(run, update=update)
     if not isinstance(settings, dict):
         settings = _loadyaml(settings, update)
     for setting in settings:
