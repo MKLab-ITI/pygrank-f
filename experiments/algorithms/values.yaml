@@ -1,5 +1,5 @@
 ---
-  fairfilter:
+  fairobjective:
     generator: metric
     sum:
     - name: l1
@@ -8,6 +8,7 @@
         - base
         - run
     - name: prule
+      weight: 10
       args:
         - sensitive
         - run
