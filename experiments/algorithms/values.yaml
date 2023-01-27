@@ -8,7 +8,7 @@
         - base
         - run
     - name: prule
-      weight: 10
+      weight: 2
       args:
         - sensitive
         - run

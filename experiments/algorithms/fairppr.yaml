@@ -1,0 +1,50 @@
+---
+  - name: base
+    steps:
+      - name: train
+      - name: filter
+      - name: normalize
+    aspects:
+      spectrum: col
+      norm: 1
+      coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85
+
+  - name: lfpro
+    steps:
+      - name: train
+      - name: lfpro
+        args:
+          - sensitive
+      - name: normalize
+    aspects:
+      norm: 1
+
+  - name: lfprp
+    steps:
+      - name: train
+      - name: lfprp
+        args:
+          - sensitive
+          - base
+      - name: normalize
+    aspects:
+      alpha: 0.85
+      norm: 1
+
+  - name: nsf
+    steps:
+      - name: neural
+        args:
+          - train
+          - base
+          - sensitive
+      - name: filter
+      - name: normalize
+      - name: tune
+        args:
+          - https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective
+          - tfsgd
+    aspects:
+      spectrum: col
+      norm: 1
+      coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85

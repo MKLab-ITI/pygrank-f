@@ -1,5 +1,5 @@
 from pyfop import *
-from pygrankf.core import backend, GraphSignal
+from pygrankf.core import backend, GraphSignal, to_signal
 
 
 @lazy_no_cache
@@ -40,7 +40,7 @@ def fairmult(sensitive: GraphSignal, exclude: GraphSignal = None):
 
 
 def lfpro(sensitive: GraphSignal, exclude: GraphSignal = None):
-    def distribute(DR: GraphSignal, ranks: GraphSignal, eps: float):
+    def distribute(DR: GraphSignal, ranks: GraphSignal, sensitive: GraphSignal, eps: float):
         min_rank = float("inf")
         while min_rank >= eps and DR > 0:
             ranks = {
@@ -69,12 +69,12 @@ def lfpro(sensitive: GraphSignal, exclude: GraphSignal = None):
             red = distribute(
                 phi - sumR, ranks, {v: 1 - sensitive.get(v, 0) for v in ranks}, eps
             )
-            ranks = {v: red.get(v, ranks[v] + (phi - sumR) / numR) for v in ranks}
+            ranks = to_signal(ranks, {v: red.get(v, ranks[v] + (phi - sumR) / numR) for v in ranks})
         elif sumB < 1 - phi:
             red = distribute(
                 1 - phi - sumB, ranks, {v: sensitive.get(v, 0) for v in ranks}, eps
             )
-            ranks = {v: red.get(v, ranks[v] + (1 - phi - sumB) / numB) for v in ranks}
+            ranks = to_signal(ranks, {v: red.get(v, ranks[v] + (1 - phi - sumB) / numB) for v in ranks})
         return ranks
 
     return method
