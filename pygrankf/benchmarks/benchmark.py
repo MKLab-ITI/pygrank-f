@@ -4,6 +4,8 @@ from typing import Union
 
 def benchmark(settings: Union[str, dict], run, **kwargs):
     import pygrankf as pgf
+    if isinstance(run, str) or isinstance(run, dict):
+        run = pgf.experiments(run)
     if not isinstance(settings, dict):
         with open(settings) as file:
             settings = yaml.load(file, Loader=yaml.SafeLoader)

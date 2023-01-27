@@ -17,6 +17,8 @@ def _parsearg(values, arg):
     generator = arg["generator"]
     if not callable(generator):
         generator = getattr(pgf, generator)
+    if "args" in arg:
+        return generator(*[a if a not in values else _parsearg(values, a) for a in arg["args"]])
     return generator(arg, values)
 
 
@@ -51,7 +53,7 @@ def run(algorithms: Union[str, dict], **kwargs):
                 func = func(*[_parsearg(values, arg) for arg in step["args"]])
             steps.append(func)
         result = pgf.steps(*steps)
-        result = result.call(**{k: values.get(v, v) for k, v in alg["aspects"].items()})
+        result = result.call(**{k: v if not isinstance(v, dict) and v not in values else _parsearg(values, v) for k, v in alg["aspects"].items()})
         results[alg["name"]] = result
         values[alg["name"]] = result
     return results

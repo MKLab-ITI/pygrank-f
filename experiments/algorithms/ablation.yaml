@@ -7,7 +7,40 @@
     aspects:
       spectrum: symmetric
       norm: 1
-      coefficients: coefficients
+      coefficients:
+        generator: HeatKernels
+        args:
+          - 1
+
+  - name: fpo
+    steps:
+      - name: neural
+        args:
+          - train
+          - base
+          - sensitive
+      - name: normalize
+      - name: tune
+        args:
+          - generator: metric
+            sum:
+            - name: l1
+              weight: -1
+              args:
+                - base
+                - run
+            - name: prule
+              args:
+                - sensitive
+                - run
+            - name: l1reg
+              weight: -0.1
+              args:
+                - run
+          - tfsgd
+    aspects:
+      norm: 1
+
 
   - name: NSF
     steps:
@@ -39,4 +72,7 @@
     aspects:
       spectrum: symmetric
       norm: 1
-      coefficients: coefficients
+      coefficients:
+        generator: HeatKernel
+        args:
+          - 1

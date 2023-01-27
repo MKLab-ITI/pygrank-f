@@ -78,7 +78,5 @@ def run(train, exclude, sensitive, **kwargs):
 """
 
 
-experiments = pgf.experiments("experiments/algorithms/algorithms.yaml",
-                              coefficients=pgf.HeatKernels(1))
-
+experiments = pgf.experiments("experiments/algorithms/ablation.yaml")
 pgf.benchmark("experiments/fairness/test.yaml", experiments, delim="&", endl="\\\\\n")
