@@ -14,9 +14,10 @@ class HeatKernels(Iterable[float]):
                 self.power = 1
 
             def __next__(self):
-                ret = self.power/self.factorial
+                ret = self.power / self.factorial
                 self.i += 1
                 self.factorial *= self.i
                 self.power *= self.k
                 return ret
+
         return Iterator(self.k)

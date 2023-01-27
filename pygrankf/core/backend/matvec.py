@@ -56,12 +56,12 @@ def graph_dropout(M, _):
 
 def separate_cols(x):
     return [mv.Vector(x[:, col]) for col in range(x.shape[1])]
-    #raise Exception("matvec does not support column separation")
+    # raise Exception("matvec does not support column separation")
 
 
 def combine_cols(cols):
     return np.column_stack([col.np() for col in cols])
-    #raise Exception("matvec does not support column combination")
+    # raise Exception("matvec does not support column combination")
 
 
 def backend_name():
@@ -102,7 +102,13 @@ def to_primitive(obj):
 
 
 def is_array(obj):
-    return isinstance(obj, mv.Vector) or isinstance(obj, list) or isinstance(obj, np.ndarray) or obj.__class__.__module__ == "tensorflow.python.framework.ops" or obj.__class__.__module__ == "torch"
+    return (
+        isinstance(obj, mv.Vector)
+        or isinstance(obj, list)
+        or isinstance(obj, np.ndarray)
+        or obj.__class__.__module__ == "tensorflow.python.framework.ops"
+        or obj.__class__.__module__ == "torch"
+    )
 
 
 def self_normalize(obj):
@@ -113,7 +119,7 @@ def self_normalize(obj):
 
 
 def conv(signal, M):
-    return signal*M
+    return signal * M
 
 
 def length(x):
@@ -129,4 +135,4 @@ def filter_out(x, exclude):
 
 
 def epsilon():
-    return np.finfo(np.float64).eps*4
+    return np.finfo(np.float64).eps * 4

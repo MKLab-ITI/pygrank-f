@@ -7,7 +7,7 @@ from pyfop import *
 @lazy_no_cache
 @autoaspects
 class Convergence:
-    """ Used to keep previous iteration and generally manage convergence of variables. Graph filters
+    """Used to keep previous iteration and generally manage convergence of variables. Graph filters
     automatically create instances of this class by passing on appropriate parameters.
 
     Examples:
@@ -18,10 +18,10 @@ class Convergence:
         >>>     ...
         >>>     var = ...
     """
-    def __init__(self,
-                 tol: float = 1.E-6,
-                 errortype: str = "iters",
-                 maxiters: int = 20):
+
+    def __init__(
+        self, tol: float = 1.0e-6, errortype: str = "iters", maxiters: int = 20
+    ):
         """
         Initializes a convergence manager with a provided tolerance level, error type and number of iterations.
 
@@ -72,18 +72,26 @@ class Convergence:
         self.iteration += 1
         if self.iteration >= self.max_iters:
             if self.error_type == "iters":
-                self.elapsed_time = time()-self._start_time
+                self.elapsed_time = time() - self._start_time
                 return True
-            raise Exception("Could not converge within "+str(self.max_iters)+" iterations")
-        converged = False if self.last_ranks is None else self._has_converged(self.last_ranks, new_ranks)
+            raise Exception(
+                "Could not converge within " + str(self.max_iters) + " iterations"
+            )
+        converged = (
+            False
+            if self.last_ranks is None
+            else self._has_converged(self.last_ranks, new_ranks)
+        )
         self.last_ranks = new_ranks
-        self.elapsed_time = time()-self._start_time
+        self.elapsed_time = time() - self._start_time
         return converged
 
-    def _has_converged(self, prev_ranks: BackendPrimitive, ranks: BackendPrimitive) -> bool:
+    def _has_converged(
+        self, prev_ranks: BackendPrimitive, ranks: BackendPrimitive
+    ) -> bool:
         if self.error_type == "iters":
             return False
         return self.error_type(prev_ranks, ranks) <= max(self.tol, backend.epsilon())
 
     def __str__(self):
-        return str(self.iteration)+" iterations ("+str(self.elapsed_time)+" sec)"
+        return str(self.iteration) + " iterations (" + str(self.elapsed_time) + " sec)"

@@ -1,69 +1,130 @@
 import yaml
 from typing import Union
+import os
+import wget
 
 
-def benchmark(settings: Union[str, dict], run, **kwargs):
+def _loadyaml(path, update=False):
+    if path.startswith("https://"):
+        download_path = os.path.join(
+            os.path.expanduser("~"), ".pygrank/experiments", path[8:]
+        )
+        os.makedirs(os.path.split(download_path)[0], exist_ok=True)
+        if not os.path.exists(download_path) or update:
+            wget.download(path, download_path)
+        path = download_path
+    with open(path, "r") as file:
+        ret = yaml.load(file, Loader=yaml.SafeLoader)
+    return ret
+
+
+def benchmark(settings: Union[str, dict], run, update=False, **kwargs):
     import pygrankf as pgf
+
     if isinstance(run, str) or isinstance(run, dict):
         run = pgf.experiments(run)
     if not isinstance(settings, dict):
-        with open(settings) as file:
-            settings = yaml.load(file, Loader=yaml.SafeLoader)
+        settings = _loadyaml(settings, update)
     for setting in settings:
-        pgf.print("\n"+"-"*10+" "+setting["name"]+" "+"-"*10+"\n", **kwargs)
+        pgf.print(
+            "\n" + "-" * 10 + " " + setting["name"] + " " + "-" * 10 + "\n", **kwargs
+        )
         line = None
-        for dataset in setting['datasets']:
+        for dataset in setting["datasets"]:
             summary = list() if dataset.get("summary", False) else None
             if dataset.get("skip", False):
                 continue
-            communities = pgf.load(dataset['name'],
-                                   min_members=dataset.get('min_members', 0.01),
-                                   num_groups=dataset.get('num_groups', 20))
-            named_communities = {label: communities[name] for label, name in dataset['communities'].items()}
-            hide_community_names = set(dataset['communities'].values())
-            communities = {name: signal for name, signal in communities.items() if name not in hide_community_names}
-            for split in setting['community']['splits']:
+            communities = pgf.load(
+                dataset["name"],
+                min_members=dataset.get("min_members", 0.01),
+                num_groups=dataset.get("num_groups", 20),
+            )
+            named_communities = {
+                label: communities[name]
+                for label, name in dataset["communities"].items()
+            }
+            hide_community_names = set(dataset["communities"].values())
+            communities = {
+                name: signal
+                for name, signal in communities.items()
+                if name not in hide_community_names
+            }
+            for split in setting["community"]["splits"]:
                 if split.get("skip", "False") == "True":
                     continue
                 for community_name, community in communities.items():
-                    #from pygrankf import backend
-                    #print(backend.length(community))
+                    # from pygrankf import backend
+                    # print(backend.length(community))
                     variables = {k: v for k, v in named_communities.items()}
                     pending_variables = dict()
                     for variable, fraction in split["variables"].items():
                         if fraction in variables:
                             variables[variable] = variables[fraction]
-                        elif fraction == 'None':
+                        elif fraction == "None":
                             variables[variable] = None
-                        elif fraction == 'Random':
+                        elif fraction == "Random":
                             import random
-                            variables[variable] = pgf.to_signal(community, {v: random.random() for v in community})
-                        elif fraction == 'Remaining':
+
+                            variables[variable] = pgf.to_signal(
+                                community, {v: random.random() for v in community}
+                            )
+                        elif fraction == "Remaining":
                             variables[variable] = community
                         else:
-                            variables[variable], community = community.split(fraction, seed=split.get("seed", 0))
+                            variables[variable], community = community.split(
+                                fraction, seed=split.get("seed", 0)
+                            )
                     algorithms = run(**variables)
-                    variables = variables | algorithms  # be able to reference specific algorithms in metrics
+                    variables = (
+                        variables | algorithms
+                    )  # be able to reference specific algorithms in metrics
                     for variable, fraction in pending_variables:
                         variables[variable] = algorithms.get(fraction)
                     if not line:
-                        line = [" "*30] + [algorithm for algorithm in algorithms for _ in setting['community']['metrics']]
+                        line = [" " * 30] + [
+                            algorithm
+                            for algorithm in algorithms
+                            for _ in setting["community"]["metrics"]
+                        ]
                         pgf.print(*line, **kwargs)
-                        line = [" "*30] + [metric["name"] for _ in algorithms for metric in setting['community']['metrics']]
+                        line = [" " * 30] + [
+                            metric["name"]
+                            for _ in algorithms
+                            for metric in setting["community"]["metrics"]
+                        ]
                         pgf.print(*line, **kwargs)
-                    line = [(dataset['name']+" "+str(community_name)+" ("+str(split["name"])+")").ljust(30)]
+                    line = [
+                        (
+                            dataset["name"]
+                            + " "
+                            + str(community_name)
+                            + " ("
+                            + str(split["name"])
+                            + ")"
+                        ).ljust(30)
+                    ]
                     for algorithm, results in algorithms.items():
                         variables["run"] = results
-                        for metric in setting['community']['metrics']:
+                        for metric in setting["community"]["metrics"]:
                             func = getattr(pgf, metric["name"])
                             args = [variables[arg] for arg in metric["args"]]
                             line.append(func(*args))
                     if summary is not None:
                         if len(summary) == 0:
-                            summary = [dataset['name'].ljust(30)] + [list() for _ in range(len(line)-1)]
+                            summary = [dataset["name"].ljust(30)] + [
+                                list() for _ in range(len(line) - 1)
+                            ]
                         for i in range(1, len(line)):
                             summary[i].append(line[i])
-                    #else:
+                    # else:
                     pgf.print(*line, **kwargs)
             if summary:
-                pgf.print(*[sum(values)/len(values) if isinstance(values, list) else values for values in summary], **kwargs)
+                pgf.print(
+                    *[
+                        sum(values) / len(values)
+                        if isinstance(values, list)
+                        else values
+                        for values in summary
+                    ],
+                    **kwargs
+                )

@@ -72,10 +72,22 @@ class Fastgraph:
 
     def to_scipy_sparse_array(self):
         if self._masked_out:
-            return coo_matrix(([0 if u in self._masked_out and v in self._masked_out[u] else 1 for u, v in zip(self.edge_row, self.edge_col)], (self.edge_row, self.edge_col)),
-                              shape=(len(self.node_map), len(self.node_map)), dtype=float)#.asformat("csr")
-        return coo_matrix(([1.]*len(self.edge_row), (self.edge_row, self.edge_col)),
-                          shape=(len(self.node_map), len(self.node_map)), dtype=float)#.asformat("csr")
+            return coo_matrix(
+                (
+                    [
+                        0 if u in self._masked_out and v in self._masked_out[u] else 1
+                        for u, v in zip(self.edge_row, self.edge_col)
+                    ],
+                    (self.edge_row, self.edge_col),
+                ),
+                shape=(len(self.node_map), len(self.node_map)),
+                dtype=float,
+            )  # .asformat("csr")
+        return coo_matrix(
+            ([1.0] * len(self.edge_row), (self.edge_row, self.edge_col)),
+            shape=(len(self.node_map), len(self.node_map)),
+            dtype=float,
+        )  # .asformat("csr")
 
     def __len__(self):
         return len(self.node_map)
@@ -86,7 +98,10 @@ class Fastgraph:
     def number_of_edges(self):
         if self._masked_out is not None:
             if self._non_maksed_edge_num is None:
-                self._non_maksed_edge_num = sum(0 if u in self._masked_out and v in self._masked_out[u] else 1 for u, v in zip(self.edge_row, self.edge_col))
+                self._non_maksed_edge_num = sum(
+                    0 if u in self._masked_out and v in self._masked_out[u] else 1
+                    for u, v in zip(self.edge_row, self.edge_col)
+                )
             ret = self._non_maksed_edge_num
         else:
             ret = len(self.edge_row)
@@ -135,7 +150,9 @@ class Fastgraph:
                     if u not in self._adj:
                         self._adj[u] = set()
                     self._adj[u].add(v)
-            self._degrees = {u: len(self._adj[u]) if u in self._adj else 0 for u in self.node_map}
+            self._degrees = {
+                u: len(self._adj[u]) if u in self._adj else 0 for u in self.node_map
+            }
 
     def has_edge(self, u, v):
         self._create_adjacency()

@@ -3,6 +3,7 @@ from numpy import abs, sum, exp, log, copy, repeat, min, max, dot, mean, diag, o
 from scipy.sparse import eye
 import warnings
 import os
+
 if "MKL_NUM_THREADS" not in os.environ:
     os.environ["MKL_NUM_THREADS"] = str(os.cpu_count())
 
@@ -12,9 +13,11 @@ try:
     import sparse_dot_mkl
 except Exception as e:
     __pygrank_sparse_dot_mkl_warning = True
-    warnings.warn("sparse_dot_mkl could not be imported.\n"
-                  "Please check your environment setup.\n"
-                  "Falling back to numpy implementation for this backend.")
+    warnings.warn(
+        "sparse_dot_mkl could not be imported.\n"
+        "Please check your environment setup.\n"
+        "Falling back to numpy implementation for this backend."
+    )
     warnings.warn(str(e))
 
 
@@ -66,7 +69,12 @@ def to_primitive(obj):
 
 
 def is_array(obj):
-    return isinstance(obj, list) or isinstance(obj, np.ndarray) or obj.__class__.__module__ == "tensorflow.python.framework.ops" or obj.__class__.__module__ == "torch"
+    return (
+        isinstance(obj, list)
+        or isinstance(obj, np.ndarray)
+        or obj.__class__.__module__ == "tensorflow.python.framework.ops"
+        or obj.__class__.__module__ == "torch"
+    )
 
 
 def self_normalize(obj):
@@ -85,9 +93,11 @@ def conv(signal, M):
     except Exception as e:
         if not __pygrank_sparse_dot_mkl_warning:
             __pygrank_sparse_dot_mkl_warning = True
-            warnings.warn("sparse_dot_mkl failed to link for sparse matrix multiplication.\n"
-                          "Please check your environment setup.\n"
-                          "Falling back to numpy implementation for this backend.")
+            warnings.warn(
+                "sparse_dot_mkl failed to link for sparse matrix multiplication.\n"
+                "Please check your environment setup.\n"
+                "Falling back to numpy implementation for this backend."
+            )
             warnings.warn(str(e))
         return signal * M
 
@@ -95,7 +105,7 @@ def conv(signal, M):
 def length(x):
     if isinstance(x, np.ndarray):
         if len(x.shape) > 1:
-            return x.shape[0]*x.shape[1]
+            return x.shape[0] * x.shape[1]
         return x.shape[0]
     return len(x)
 
@@ -109,5 +119,5 @@ def filter_out(x, exclude):
 
 
 def epsilon():
-    #return np.finfo(np.float32).eps
+    # return np.finfo(np.float32).eps
     return np.finfo(float).eps

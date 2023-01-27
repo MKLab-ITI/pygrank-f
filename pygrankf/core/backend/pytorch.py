@@ -35,7 +35,9 @@ def graph_dropout(M, dropout):
     if dropout == 0:
         return M
     # TODO: change based on future sparse matrix support: https://github.com/pytorch/pytorch/projects/24#card-59611437
-    return torch.sparse_coo_tensor(M.indices(), torch.nn.functional.dropout(M.values(), dropout), M.shape)#.coalesce()
+    return torch.sparse_coo_tensor(
+        M.indices(), torch.nn.functional.dropout(M.values(), dropout), M.shape
+    )  # .coalesce()
 
 
 def separate_cols(x):
@@ -44,7 +46,7 @@ def separate_cols(x):
 
 def combine_cols(cols):
     if len(cols[0].shape) < 2:
-        cols = [torch.reshape(col, (-1,1)) for col in cols]
+        cols = [torch.reshape(col, (-1, 1)) for col in cols]
     return torch.cat(cols, dim=1)
 
 
@@ -53,16 +55,20 @@ def backend_name():
 
 
 def dot(x, y):
-    return torch.sum(x*y)
+    return torch.sum(x * y)
 
 
 def repeat(value, times):
-    return torch.ones(times)*value
+    return torch.ones(times) * value
 
 
 def scipy_sparse_to_backend(M):
     coo = M.tocoo()
-    return torch.sparse_coo_tensor(torch.LongTensor(np.vstack((coo.col, coo.row))), torch.FloatTensor(coo.data), coo.shape).coalesce()
+    return torch.sparse_coo_tensor(
+        torch.LongTensor(np.vstack((coo.col, coo.row))),
+        torch.FloatTensor(coo.data),
+        coo.shape,
+    ).coalesce()
 
 
 def to_array(obj, copy_array=False):
@@ -88,7 +94,7 @@ def is_array(obj):
 
 def self_normalize(obj):
     np_sum = sum(abs(obj))
-    return obj/np_sum if np_sum != 0 else obj
+    return obj / np_sum if np_sum != 0 else obj
 
 
 def conv(signal, M):

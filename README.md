@@ -19,6 +19,7 @@ interface of the source package.
 :cookie: Easy to use<br>
 :jigsaw: Modular interface<br>
 :dna: Organic backpropagation<br>
+:globe_with_meridians: Share experiments as web resources<br>
 
 ## Quickstart
 Graph filters are called via `pygrankf.steps` interface

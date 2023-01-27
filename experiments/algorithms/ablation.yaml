@@ -7,9 +7,9 @@
     aspects:
       spectrum: symmetric
       norm: 1
-      coefficients: experiments/algorithms/values.yaml/HK1
+      coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/HK1
 
-  - name: fpo
+  - name: nn
     steps:
       - name: neural
         args:
@@ -19,13 +19,12 @@
       - name: normalize
       - name: tune
         args:
-          - experiments/algorithms/values.yaml/fairfilter
+          - https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairfilter
           - tfsgd
     aspects:
       norm: 1
 
-
-  - name: NSF
+  - name: appnp
     steps:
       - name: neural
         args:
@@ -36,9 +35,27 @@
       - name: normalize
       - name: tune
         args:
-          - experiments/algorithms/values.yaml/fairfilter
+          - https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairfilter
           - tfsgd
     aspects:
       spectrum: symmetric
       norm: 1
-      coefficients: experiments/algorithms/values.yaml/HK1
+      coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.90
+
+  - name: nsf
+    steps:
+      - name: neural
+        args:
+          - train
+          - base
+          - sensitive
+      - name: filter
+      - name: normalize
+      - name: tune
+        args:
+          - https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairfilter
+          - tfsgd
+    aspects:
+      spectrum: symmetric
+      norm: 1
+      coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/HK1

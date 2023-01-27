@@ -8,4 +8,5 @@ def steps(*args):
 def step(*args, **kwargs):
     def method(arg):
         return args[0](arg, *args[1:], **kwargs)
+
     return method

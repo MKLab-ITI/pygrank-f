@@ -20,3 +20,38 @@
     generator: HeatKernels
     args:
       - 1
+
+  HK2:
+    generator: HeatKernels
+    args:
+      - 2
+
+  HK3:
+    generator: HeatKernels
+    args:
+      - 3
+
+  HK5:
+    generator: HeatKernels
+    args:
+      - 5
+
+  PPR0.80:
+    generator: PageRank
+    args:
+      - 0.8
+
+  PPR0.85:
+    generator: PageRank
+    args:
+      - 0.85
+
+  PPR0.90:
+    generator: PageRank
+    args:
+      - 0.9
+
+  PPR0.95:
+    generator: PageRank
+    args:
+      - 0.95

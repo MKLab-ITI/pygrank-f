@@ -2,7 +2,7 @@
   - name: test
     datasets:
       - name: citeseer
-        skip: True
+        skip: False
         summary: True
         min_members: 20
         communities:
@@ -15,7 +15,7 @@
           sensitive: 1
       - name: highschool
         min_members: 20
-        skip: True
+        skip: False
         summary: True
         communities:
           ignore: M

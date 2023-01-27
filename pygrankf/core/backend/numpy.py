@@ -51,7 +51,12 @@ def to_primitive(obj):
 
 
 def is_array(obj):
-    return isinstance(obj, list) or isinstance(obj, np.ndarray) or obj.__class__.__module__ == "tensorflow.python.framework.ops" or obj.__class__.__module__ == "torch"
+    return (
+        isinstance(obj, list)
+        or isinstance(obj, np.ndarray)
+        or obj.__class__.__module__ == "tensorflow.python.framework.ops"
+        or obj.__class__.__module__ == "torch"
+    )
 
 
 def self_normalize(obj):
@@ -68,7 +73,7 @@ def conv(signal, M):
 def length(x):
     if isinstance(x, np.ndarray):
         if len(x.shape) > 1:
-            return x.shape[0]*x.shape[1]
+            return x.shape[0] * x.shape[1]
         return x.shape[0]
     return len(x)
 
@@ -82,5 +87,5 @@ def filter_out(x, exclude):
 
 
 def epsilon():
-    #return np.finfo(np.float32).eps
+    # return np.finfo(np.float32).eps
     return np.finfo(float).eps

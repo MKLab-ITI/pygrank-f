@@ -11,7 +11,9 @@ class Tunable:
         assert len(mins) == len(maxs)
         self.mins = mins
         self.maxs = maxs
-        self.start = [(mm+mx)*0.5 for mm, mx in zip(mins, maxs)] if start is None else start
+        self.start = (
+            [(mm + mx) * 0.5 for mm, mx in zip(mins, maxs)] if start is None else start
+        )
 
 
 def tune(metric=auc, optimizer=nonconvex, validation=None, exclude=None, **extrakwargs):
@@ -19,7 +21,11 @@ def tune(metric=auc, optimizer=nonconvex, validation=None, exclude=None, **extra
         def __init__(self, result):
             self.result = result
 
-        def call(self, tuneparams={"deviation_tol": 1.E-6, "randomize_search": True}, **kwargs):
+        def call(
+            self,
+            tuneparams={"deviation_tol": 1.0e-6, "randomize_search": True},
+            **kwargs
+        ):
             for arg in kwargs:
                 if arg in extrakwargs:
                     raise Exception("Argument declared twice for tuning:", arg)
@@ -27,7 +33,9 @@ def tune(metric=auc, optimizer=nonconvex, validation=None, exclude=None, **extra
             for k, v in self.result.get_input_context().values.items():
                 if k not in kwargs:
                     kwargs[k] = v
-            fixedkwargs = {k: v for k, v in kwargs.items() if not isinstance(v, Tunable)}
+            fixedkwargs = {
+                k: v for k, v in kwargs.items() if not isinstance(v, Tunable)
+            }
             kwargs = {k: v for k, v in kwargs.items() if isinstance(v, Tunable)}
             result = self.result
             mins = list()
@@ -46,13 +54,17 @@ def tune(metric=auc, optimizer=nonconvex, validation=None, exclude=None, **extra
                     npos = pos + len(limits.mins)
                     param_kwargs[arg] = params[pos:npos]
                     pos = npos
-                param_kwargs = {k: v if len(v) != 1 else v[0] for k, v in param_kwargs.items()}
+                param_kwargs = {
+                    k: v if len(v) != 1 else v[0] for k, v in param_kwargs.items()
+                }
                 return param_kwargs
 
             def loss(params):
                 predictions = result.call(**(params2kwargs(params) | fixedkwargs))
                 return -metric(validation, predictions, exclude)
+
             bestparams = optimizer(loss, maxs, mins, start, **tuneparams)
             ret = result.call(**(params2kwargs(bestparams) | fixedkwargs))
             return ret
+
     return PendingTuner

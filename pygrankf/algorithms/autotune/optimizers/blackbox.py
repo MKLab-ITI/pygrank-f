@@ -15,26 +15,28 @@ def __add(weights, index, increment, max_val, min_val, coarse=0):
         min_val: The mimimum threshold.
     """
     weights = [weight for weight in weights]
-    weights[index] = min(max_val, max(min_val, weights[index]+increment))
+    weights[index] = min(max_val, max(min_val, weights[index] + increment))
     if coarse != 0:
-        weights[index] = round(weights[index]/coarse)*coarse
+        weights[index] = round(weights[index] / coarse) * coarse
     return weights
 
 
-def nonconvex(loss,
-              max_vals,
-              min_vals,
-              starting_parameters,
-              deviation_tol: float = 1.E-9,
-              divide_range: float = 1.01,
-              partitions: int = 5,
-              parameter_tol: float = float('inf'),
-              depth: int = 1,
-              coarse: float = 0,
-              shrink_strategy: str = "divide",
-              partition_strategy: str = "split",
-              randomize_search: bool = False,
-              verbose: bool = True):
+def nonconvex(
+    loss,
+    max_vals,
+    min_vals,
+    starting_parameters,
+    deviation_tol: float = 1.0e-9,
+    divide_range: float = 1.01,
+    partitions: int = 5,
+    parameter_tol: float = float("inf"),
+    depth: int = 1,
+    coarse: float = 0,
+    shrink_strategy: str = "divide",
+    partition_strategy: str = "split",
+    randomize_search: bool = False,
+    verbose: bool = True,
+):
     """
     Implements a coordinate descent algorithm for optimizing the argument vector of the given loss function.
     A simplified version for default parameters has been published in [krasanakis2022autogf].
@@ -83,28 +85,38 @@ def nonconvex(loss,
     if str(divide_range) != "shrinking":
         assert divide_range > 1
     if starting_parameters is None:
-        weights = [(max_val+min_val)/2 for min_val, max_val in zip(min_vals, max_vals)]
+        weights = [
+            (max_val + min_val) / 2 for min_val, max_val in zip(min_vals, max_vals)
+        ]
     else:
         weights = starting_parameters
-    range_search = [(max_val-min_val)/2 for min_val, max_val in zip(min_vals, max_vals)]
+    range_search = [
+        (max_val - min_val) / 2 for min_val, max_val in zip(min_vals, max_vals)
+    ]
     curr_variable = 0
     iter = 0
-    range_deviations = [float('inf')]*len(max_vals)
+    range_deviations = [float("inf")] * len(max_vals)
     best_weights = weights
-    best_loss = float('inf')
+    best_loss = float("inf")
     evals = 0
     while True:
         if randomize_search:
-            curr_variable = int(random()*len(weights))
+            curr_variable = int(random() * len(weights))
         if max(range_search) == 0:
             break
-        assert max(range_search) != 0, "Something went wrong and took too many iterations for optimizer to run (check for nans)"
+        assert (
+            max(range_search) != 0
+        ), "Something went wrong and took too many iterations for optimizer to run (check for nans)"
         if shrink_strategy == "shrinking":
-            range_search[curr_variable] = (max_vals[curr_variable]-min_vals[curr_variable])/((iter+1)**divide_range*log(iter+2))
+            range_search[curr_variable] = (
+                max_vals[curr_variable] - min_vals[curr_variable]
+            ) / ((iter + 1) ** divide_range * log(iter + 2))
         elif shrink_strategy == "divide":
             range_search[curr_variable] /= divide_range
         else:
-            raise Exception("Invalid shrink strategy: either shrinking or divide expected")
+            raise Exception(
+                "Invalid shrink strategy: either shrinking or divide expected"
+            )
         if range_search[curr_variable] == 0:
             range_deviations[curr_variable] = 0
             curr_variable += 1
@@ -112,21 +124,32 @@ def nonconvex(loss,
                 curr_variable -= len(max_vals)
             continue
         if partition_strategy == "split":
-            candidate_weights = [__add(weights,
-                                       curr_variable,
-                                       range_search[curr_variable]*(part*2./(partitions-1)-1),
-                                       max_vals[curr_variable],
-                                       min_vals[curr_variable],
-                                       coarse=coarse) for part in range(partitions)]
+            candidate_weights = [
+                __add(
+                    weights,
+                    curr_variable,
+                    range_search[curr_variable] * (part * 2.0 / (partitions - 1) - 1),
+                    max_vals[curr_variable],
+                    min_vals[curr_variable],
+                    coarse=coarse,
+                )
+                for part in range(partitions)
+            ]
         elif partition_strategy == "step":
-            candidate_weights = [__add(weights,
-                                       curr_variable,
-                                       part*partitions,
-                                       max_vals[curr_variable],
-                                       min_vals[curr_variable],
-                                       coarse=coarse) for part in range(
-                                                -int(range_search[curr_variable]/partitions),
-                                                1+int(range_search[curr_variable]/partitions))]
+            candidate_weights = [
+                __add(
+                    weights,
+                    curr_variable,
+                    part * partitions,
+                    max_vals[curr_variable],
+                    min_vals[curr_variable],
+                    coarse=coarse,
+                )
+                for part in range(
+                    -int(range_search[curr_variable] / partitions),
+                    1 + int(range_search[curr_variable] / partitions),
+                )
+            ]
         else:
             raise Exception("Invalid partition strategy: either split or step expected")
         loss_pairs = [(w, loss(w)) for w in candidate_weights if w is not None]
@@ -135,11 +158,16 @@ def nonconvex(loss,
         prev_best_loss = best_loss
         best_loss = weights_loss
         best_weights = weights
-        range_deviations[curr_variable] = abs(prev_best_loss-best_loss)
+        range_deviations[curr_variable] = abs(prev_best_loss - best_loss)
         if verbose:
-            utils.log(f"Tuning evaluations {evals} loss {best_loss:.8f} +- {max(range_deviations):.8f}")
+            utils.log(
+                f"Tuning evaluations {evals} loss {best_loss:.8f} +- {max(range_deviations):.8f}"
+            )
 
-        if max(range_deviations) <= deviation_tol and max(range_search) <= parameter_tol:
+        if (
+            max(range_deviations) <= deviation_tol
+            and max(range_search) <= parameter_tol
+        ):
             break
         # move to next var
         iter += 1
@@ -150,7 +178,20 @@ def nonconvex(loss,
     if verbose:
         utils.log()
     if depth > 1:
-        return nonconvex(loss, max_vals, min_vals, weights,
-                         deviation_tol, divide_range, partitions, parameter_tol, depth - 1, coarse,
-                         shrink_strategy, partition_strategy, randomize_search, verbose)
+        return nonconvex(
+            loss,
+            max_vals,
+            min_vals,
+            weights,
+            deviation_tol,
+            divide_range,
+            partitions,
+            parameter_tol,
+            depth - 1,
+            coarse,
+            shrink_strategy,
+            partition_strategy,
+            randomize_search,
+            verbose,
+        )
     return weights

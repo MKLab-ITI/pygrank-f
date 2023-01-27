@@ -13,12 +13,13 @@ class PageRank(Iterable[float]):
         class Iterator:
             def __init__(self, alpha):
                 self.alpha = alpha
-                self.product = (1-alpha)
+                self.product = 1 - alpha
 
             def __next__(self):
                 ret = self.product
                 self.product *= self.alpha
                 return ret
+
         return Iterator(self.alpha)
 
 
@@ -26,10 +27,12 @@ class PageRank(Iterable[float]):
 @autoaspects
 def pagerank(personalization, alpha=0.85, normalize=reweigh, convergence=Convergence()):
     normalized_adjacency = normalize(personalization.graph)
-    personalization = personalization/backend.sum(personalization)
+    personalization = personalization / backend.sum(personalization)
     result = personalization
     convergence.start()
     while not convergence.has_converged(result):
-        result = personalization*(1-alpha) + alpha*backend.conv(personalization, normalized_adjacency)
+        result = personalization * (1 - alpha) + alpha * backend.conv(
+            personalization, normalized_adjacency
+        )
         result = result / backend.sum(result)
     return result
