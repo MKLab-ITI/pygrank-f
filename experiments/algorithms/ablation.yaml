@@ -7,10 +7,7 @@
     aspects:
       spectrum: symmetric
       norm: 1
-      coefficients:
-        generator: HeatKernels
-        args:
-          - 1
+      coefficients: experiments/algorithms/values.yaml/HK1
 
   - name: fpo
     steps:
@@ -22,21 +19,7 @@
       - name: normalize
       - name: tune
         args:
-          - generator: metric
-            sum:
-            - name: l1
-              weight: -1
-              args:
-                - base
-                - run
-            - name: prule
-              args:
-                - sensitive
-                - run
-            - name: l1reg
-              weight: -0.1
-              args:
-                - run
+          - experiments/algorithms/values.yaml/fairfilter
           - tfsgd
     aspects:
       norm: 1
@@ -53,26 +36,9 @@
       - name: normalize
       - name: tune
         args:
-          - generator: metric
-            sum:
-            - name: l1
-              weight: -1
-              args:
-                - base
-                - run
-            - name: prule
-              args:
-                - sensitive
-                - run
-            - name: l1reg
-              weight: -0.1
-              args:
-                - run
+          - experiments/algorithms/values.yaml/fairfilter
           - tfsgd
     aspects:
       spectrum: symmetric
       norm: 1
-      coefficients:
-        generator: HeatKernel
-        args:
-          - 1
+      coefficients: experiments/algorithms/values.yaml/HK1

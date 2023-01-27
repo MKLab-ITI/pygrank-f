@@ -9,6 +9,10 @@ def experiments(algorithms: Union[str, dict], **kwargs):
 
 
 def _parsearg(values, arg):
+    if isinstance(arg, str) and ".yaml/" in arg:
+        file, arg = arg.split(".yaml/")
+        with open(file+".yaml", "r") as file:
+            arg = yaml.load(file, Loader=yaml.SafeLoader)[arg]
     import pygrankf as pgf
     if isinstance(arg, str):
         if hasattr(pgf, arg):
@@ -53,7 +57,7 @@ def run(algorithms: Union[str, dict], **kwargs):
                 func = func(*[_parsearg(values, arg) for arg in step["args"]])
             steps.append(func)
         result = pgf.steps(*steps)
-        result = result.call(**{k: v if not isinstance(v, dict) and v not in values else _parsearg(values, v) for k, v in alg["aspects"].items()})
+        result = result.call(**{k: v if not isinstance(v, dict) and v not in values and (not isinstance(v, str) or ".yaml" not in v) else _parsearg(values, v) for k, v in alg["aspects"].items()})
         results[alg["name"]] = result
         values[alg["name"]] = result
     return results
