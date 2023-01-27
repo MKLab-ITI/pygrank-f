@@ -6,9 +6,9 @@ from pygrankf.algorithms.autotune.autogf import Tunable
 from typing import Iterable
 
 
-@lazy
+@lazy_no_cache
 @autoaspects
-def filter(personalization: GraphSignal, coefficients: Iterable[float] = Tunable([0]*40, [1]*40),
+def filter(personalization: GraphSignal, coefficients: Iterable[float] = None,
            normalize=reweigh, convergence=Convergence()) -> GraphSignal:
     coefficients = iter(coefficients)
     normalized_adjacency = normalize(personalization.graph)

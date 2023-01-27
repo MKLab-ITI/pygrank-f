@@ -1,0 +1,42 @@
+---
+  - name: base
+    steps:
+      - name: train
+      - name: filter
+      - name: normalize
+    aspects:
+      spectrum: symmetric
+      norm: 1
+      coefficients: coefficients
+
+  - name: NSF
+    steps:
+      - name: neural
+        args:
+          - train
+          - base
+          - sensitive
+      - name: filter
+      - name: normalize
+      - name: tune
+        args:
+          - generator: metric
+            sum:
+            - name: l1
+              weight: -1
+              args:
+                - base
+                - run
+            - name: prule
+              args:
+                - sensitive
+                - run
+            - name: l1reg
+              weight: -0.1
+              args:
+                - run
+          - tfsgd
+    aspects:
+      spectrum: symmetric
+      norm: 1
+      coefficients: coefficients

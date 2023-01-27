@@ -33,5 +33,6 @@ def reweigh(graph, spectrum="auto", weight="weight", renormalize=False, cors=Tru
     elif normalization != "none":
         raise Exception("Supported normalizations: none, col, symmetric, auto")
     ret = backend.scipy_sparse_to_backend(M)
-    ret.cors = {"numpy": M, backend.backend_name(): ret}
+    if cors:
+        ret.cors = {"numpy": M, backend.backend_name(): ret}
     return ret

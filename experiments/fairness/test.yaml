@@ -1,17 +1,22 @@
 ---
-  - name: fair community recommendation
+  - name: test
     datasets:
-      - name: pokec
+      - name: citeseer
+        skip: True
+        summary: True
         min_members: 20
-        skip: False
         communities:
-          sensitive: gender
+          sensitive: AI
       - name: facebook01
+        skip: False
+        summary: True
         min_members: 20
         communities:
           sensitive: 1
       - name: highschool
         min_members: 20
+        skip: True
+        summary: True
         communities:
           ignore: M
           sensitive: F
@@ -31,6 +36,10 @@
             test: Remaining
             exclude: None
       metrics:
+        - name: l1
+          args:
+            - base
+            - run
         - name: auc
           args:
             - test
@@ -40,5 +49,3 @@
           args:
             - sensitive
             - run
-      summary:
-        - mean

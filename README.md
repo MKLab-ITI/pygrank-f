@@ -10,7 +10,7 @@ capabilities. New features successfully developed in this
 repository will be eventually fleshed out in the
 interface of the source package.
 
-**Dependencies:** `pyfop`,`pyyaml`,`numpy`,`network`<br>
+**Dependencies:** `pyfop`,`pyyaml`,`numpy`,`networkx`<br>
 **Development:** Emmanouil (Manios) Krasanakis<br>
 **Contant:** maniospas@hotmail.com
 

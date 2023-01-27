@@ -12,7 +12,7 @@ def safe_div(a, b):
 
 #@lazy_no_cache
 #@autoaspects
-def lfpro(sensitive, original, prule=1):
+def lfprp(sensitive, original, prule=1):
     phi = backend.sum(sensitive)*prule / (backend.length(sensitive)+backend.sum(sensitive)*(prule-1))
     # custom graph preprocessing
     M = sensitive.graph.to_scipy_sparse_array()

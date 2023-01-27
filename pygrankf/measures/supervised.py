@@ -41,6 +41,28 @@ def l1(test: GraphSignal, prediction: GraphSignal, exclude: Optional[GraphSignal
 
 
 @eager_no_cache
+def l1reg(prediction: GraphSignal, exclude: Optional[GraphSignal] = None) -> float:
+    prediction = prediction.filter(exclude)
+    return backend.sum(backend.abs(prediction))
+
+
+@eager_no_cache
+def l2(test: GraphSignal, prediction: GraphSignal, exclude: Optional[GraphSignal] = None) -> float:
+    assert test is not None
+    prediction = prediction.filter(exclude)
+    test = test.filter(exclude)
+    return backend.sum(backend.abs(prediction-test)**2)**0.5
+
+
+@eager_no_cache
+def msq(test: GraphSignal, prediction: GraphSignal, exclude: Optional[GraphSignal] = None) -> float:
+    assert test is not None
+    prediction = prediction.filter(exclude)
+    test = test.filter(exclude)
+    return backend.sum(backend.abs(prediction-test)**2)
+
+
+@eager_no_cache
 def l1partial(test: GraphSignal, prediction: GraphSignal, exclude: Optional[GraphSignal] = None) -> float:
     assert test is not None
     prediction = prediction.filter(exclude)

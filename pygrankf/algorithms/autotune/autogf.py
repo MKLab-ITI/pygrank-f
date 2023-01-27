@@ -14,7 +14,7 @@ class Tunable:
         self.start = [(mm+mx)*0.5 for mm, mx in zip(mins, maxs)] if start is None else start
 
 
-def tune(validation=None, metric=auc, exclude=None, optimizer=nonconvex, **extrakwargs):
+def tune(metric=auc, optimizer=nonconvex, validation=None, exclude=None, **extrakwargs):
     class PendingTuner:
         def __init__(self, result):
             self.result = result
@@ -23,7 +23,10 @@ def tune(validation=None, metric=auc, exclude=None, optimizer=nonconvex, **extra
             for arg in kwargs:
                 if arg in extrakwargs:
                     raise Exception("Argument declared twice for tuning:", arg)
-            kwargs = kwargs | extrakwargs | self.result.get_input_context().values
+            kwargs = kwargs | extrakwargs
+            for k, v in self.result.get_input_context().values.items():
+                if k not in kwargs:
+                    kwargs[k] = v
             fixedkwargs = {k: v for k, v in kwargs.items() if not isinstance(v, Tunable)}
             kwargs = {k: v for k, v in kwargs.items() if isinstance(v, Tunable)}
             result = self.result

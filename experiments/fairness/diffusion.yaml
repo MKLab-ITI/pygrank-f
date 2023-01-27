@@ -2,9 +2,11 @@
   - name: diffusion fairness
     datasets:
       - name: polbooks
+        summary: True
         communities:
           sensitive: 2
       - name: polblogs
+        summary: True
         communities:
           sensitive: 1
     community:

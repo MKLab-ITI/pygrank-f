@@ -5,12 +5,12 @@ def tfsgd(loss,
           max_vals,
           min_vals,
           starting_parameters,
-          epochs: int = 5000,
+          epochs: int = 2000,
           patience: int = 100,
           tfoptimizer=None,
           **kwargs):
     import tensorflow as tf
-    optimizer = tf.optimizers.Adam(0.01) if tfoptimizer is None else tfoptimizer
+    optimizer = tf.optimizers.SGD(0.01) if tfoptimizer is None else tfoptimizer
     #optimizer2 = tf.optimizers.SGD(0.01)
     with backend.Backend("tensorflow"):
         parameters = [tf.Variable(value, dtype=tf.float32) for value in starting_parameters]
