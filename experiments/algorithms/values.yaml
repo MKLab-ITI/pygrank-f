@@ -2,20 +2,20 @@
   fairobjective:
     generator: metric
     sum:
-    - name: l1
-      weight: -1
-      args:
-        - base
-        - run
-    - name: prule
-      weight: 2
-      args:
-        - sensitive
-        - run
-    - name: l1reg
-      weight: -0.1
-      args:
-        - run
+      - name: l1
+        weight: -1
+        args:
+          - base
+          - run
+        - name: prule
+          weight: 2
+          args:
+            - sensitive
+            - run
+        - name: l1reg
+          weight: -0.00001
+          args:
+            - run
 
   HK1:
     generator: HeatKernels

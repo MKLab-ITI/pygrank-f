@@ -31,6 +31,23 @@
       alpha: 0.85
       norm: 1
 
+  - name: fp
+    steps:
+      - name: culep
+        args:
+          - train
+          - base
+          - sensitive
+      - name: filter
+      - name: normalize
+      - name: tune
+        args:
+          - https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective
+    aspects:
+      spectrum: col
+      norm: 1
+      coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85
+
   - name: nsf
     steps:
       - name: neural

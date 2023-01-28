@@ -6,15 +6,15 @@ def tfsgd(
     max_vals,
     min_vals,
     starting_parameters,
-    epochs: int = 2000,
+    epochs: int = 5000,
     patience: int = 100,
     tfoptimizer=None,
     **kwargs,
 ):
     import tensorflow as tf
 
-    optimizer = tf.optimizers.SGD(0.01) if tfoptimizer is None else tfoptimizer
-    # optimizer2 = tf.optimizers.SGD(0.01)
+    optimizer = tf.optimizers.Adam(0.01) if tfoptimizer is None else tfoptimizer
+    optimizer2 = tf.optimizers.SGD(0.01)
     with backend.Backend("tensorflow"):
         parameters = [
             tf.Variable(value, dtype=tf.float32) for value in starting_parameters
@@ -33,12 +33,12 @@ def tfsgd(
                 curr_patience = patience
                 best_params = [float(value.numpy()) for value in parameters]
             optimizer.apply_gradients(zip(gradients, parameters))
-            # optimizer2.apply_gradients(zip(gradients, parameters))
-            for var, mm, mx in zip(parameters, min_vals, max_vals):
-                if var < mm:
-                    var.assign(mm)
-                if var > mx:
-                    var.assign(mx)
+            optimizer2.apply_gradients(zip(gradients, parameters))
+            #for var, mm, mx in zip(parameters, min_vals, max_vals):
+            #    if var < mm:
+            #        var.assign(mm)
+            #    if var > mx:
+            #        var.assign(mx)
             curr_patience -= 1
             if curr_patience == 0:
                 break

@@ -8,7 +8,7 @@
         communities:
           sensitive: AI
       - name: facebook01
-        skip: False
+        skip: True
         summary: True
         min_members: 20
         communities:

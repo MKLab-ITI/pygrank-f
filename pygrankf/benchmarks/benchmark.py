@@ -62,11 +62,15 @@ def benchmark(settings: Union[str, dict], run, update=False, **kwargs):
                             variables[variable] = variables[fraction]
                         elif fraction == "None":
                             variables[variable] = None
+                        elif fraction == "RandomPos":
+                            import random
+                            variables[variable] = pgf.to_signal(
+                                community, {v: random.random() for v in community}  # this is for all graph nodes
+                            )
                         elif fraction == "Random":
                             import random
-
                             variables[variable] = pgf.to_signal(
-                                community, {v: random.random() for v in community}
+                                community, {v: 2*(random.random()-0.5) for v in community}  # this is for all graph nodes
                             )
                         elif fraction == "Remaining":
                             variables[variable] = community
@@ -117,7 +121,8 @@ def benchmark(settings: Union[str, dict], run, update=False, **kwargs):
                         for i in range(1, len(line)):
                             summary[i].append(line[i])
                     # else:
-                    pgf.print(*line, **kwargs)
+                    if dataset.get("show", "True") == "True":
+                        pgf.print(*line, **kwargs)
             if summary:
                 pgf.print(
                     *[

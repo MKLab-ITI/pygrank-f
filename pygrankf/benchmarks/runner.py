@@ -43,6 +43,10 @@ def metric(instructions: dict, values: dict):
         for element in instructions["sum"]:
             func = getattr(pgf, element["name"])
             value = func(*[localvalues[arg] for arg in element["args"]])
+            if "min" in element:
+                value = max(value, element["min"])
+            if "max" in element:
+                value = min(value, element["max"])
             result = result + value * element.get("weight", 1)
         return result
 

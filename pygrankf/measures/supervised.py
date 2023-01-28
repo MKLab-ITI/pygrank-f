@@ -153,6 +153,8 @@ def prule(
     non_sensitive_rate = backend.sum((1 - sensitive) * prediction) / backend.sum(
         1 - sensitive
     )
+    sensitive_rate = backend.abs(sensitive_rate)
+    non_sensitive_rate = backend.abs(non_sensitive_rate)
     return min(sensitive_rate, non_sensitive_rate) / max(
         sensitive_rate, non_sensitive_rate
     )
@@ -171,4 +173,6 @@ def cv(
     non_sensitive_rate = backend.sum((1 - sensitive) * prediction) / backend.sum(
         1 - sensitive
     )
+    sensitive_rate = backend.abs(sensitive_rate)
+    non_sensitive_rate = backend.abs(non_sensitive_rate)
     return backend.abs(sensitive_rate - non_sensitive_rate)
