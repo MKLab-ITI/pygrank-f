@@ -20,6 +20,7 @@ def _loadyaml(path, update=False):
 
 def characteristics(settings: Union[str, dict], update=False, **kwargs):
     import pygrankf as pgf
+
     if not isinstance(settings, dict):
         settings = _loadyaml(settings, update)
     pgf.print("Community".ljust(30), "Nodes", "Edges", "Members", "Protected")
@@ -43,17 +44,15 @@ def characteristics(settings: Union[str, dict], update=False, **kwargs):
                 if name not in hide_community_names
             }
             for community_name, community in communities.items():
-                name = (
-                            dataset["name"]
-                            + " "
-                            + str(community_name)
-                        ).ljust(30)
-                pgf.print(name,
-                          community.graph.number_of_nodes(),
-                          community.graph.number_of_edges(),
-                          pgf.sum(community),
-                          pgf.sum(next(iter(named_communities.values()))),
-                          **kwargs)
+                name = (dataset["name"] + " " + str(community_name)).ljust(30)
+                pgf.print(
+                    name,
+                    community.graph.number_of_nodes(),
+                    community.graph.number_of_edges(),
+                    pgf.sum(community),
+                    pgf.sum(next(iter(named_communities.values()))),
+                    **kwargs
+                )
 
 
 def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwargs):
@@ -65,9 +64,7 @@ def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwar
         settings = _loadyaml(settings, update)
     total = list() if total else None
     for setting in settings:
-        pgf.print(
-            "\n" + "-" * 10 + " " + setting["name"] + " " + "-" * 10 + "\n"
-        )
+        pgf.print("\n" + "-" * 10 + " " + setting["name"] + " " + "-" * 10 + "\n")
         line = None
         for dataset in setting["datasets"]:
             summary = list() if dataset.get("summary", False) else None
@@ -193,13 +190,11 @@ def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwar
                             list() for _ in range(len(summary) - 1)
                         ]
                     for i in range(1, len(summary)):
-                        total[i].append(sum(summary[i])/len(summary[i]))
+                        total[i].append(sum(summary[i]) / len(summary[i]))
     if total:
         pgf.print(
             *[
-                sum(values) / len(values)
-                if isinstance(values, list)
-                else values
+                sum(values) / len(values) if isinstance(values, list) else values
                 for values in total
             ],
             **kwargs

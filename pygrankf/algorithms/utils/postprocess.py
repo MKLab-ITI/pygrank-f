@@ -12,11 +12,16 @@ def normalize(signal: GraphSignal, norm=None) -> GraphSignal:
     return signal / norm_value
 
 
-def sweep(original: GraphSignal, desired: Union[float, GraphSignal] = 1.):
+def sweep(original: GraphSignal, desired: Union[float, GraphSignal] = 1.0):
     @lazy_no_cache
     @autoaspects
-    def ratio(signal: GraphSignal, original: GraphSignal, desired: Union[float, GraphSignal], sweep_offset=0) -> GraphSignal:
-        return (signal+sweep_offset) * desired / (original+sweep_offset)
+    def ratio(
+        signal: GraphSignal,
+        original: GraphSignal,
+        desired: Union[float, GraphSignal],
+        sweep_offset=0,
+    ) -> GraphSignal:
+        return (signal + sweep_offset) * desired / (original + sweep_offset)
 
     def method(signal):
         return ratio(signal, original, desired)
