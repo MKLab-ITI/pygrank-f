@@ -10,4 +10,3 @@ with tf.device('cpu'):
         pgf.benchmark("experiments/fairness/links.yaml", algorithms,
                       update=True, delim="&", endl="\\\\\n", total=True)
 
-pgf.sweep()
