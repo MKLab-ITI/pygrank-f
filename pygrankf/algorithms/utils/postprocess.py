@@ -19,8 +19,12 @@ def sweep(original: GraphSignal, desired: Union[float, GraphSignal] = 1.0):
         signal: GraphSignal,
         original: GraphSignal,
         desired: Union[float, GraphSignal],
-        sweep_offset=0,
+        sweep_offset: Union[float, str] = 0,
     ) -> GraphSignal:
+        if sweep_offset == "max":
+            sweep_offset = backend.max(original)
+        if sweep_offset < 0:
+            raise Exception("Negative sweep offset")
         return (signal + sweep_offset) * desired / (original + sweep_offset)
 
     def method(signal):

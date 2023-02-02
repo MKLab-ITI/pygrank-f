@@ -1,4 +1,10 @@
 ---
+  - name: coefficients
+    default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85
+
+  - name: fairobjective
+    default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective2
+
   - name: base
     steps:
       - name: train
@@ -64,23 +70,11 @@
       - name: normalize
       - name: tune
         args:
-          - generator: metric
-            sum:
-            - name: l1
-              weight: -1
-              args:
-                - base
-                - run
-            - name: prule
-              weight: 2
-              args:
-                - sensitive
-                - run
+          - fairobjective
     aspects:
       spectrum: col
       norm: 1
       coefficients: coefficients
-
 
   - name: nsgff
     steps:
@@ -98,25 +92,10 @@
       - name: normalize
       - name: tune
         args:
-          - generator: metric
-            sum:
-            - name: l1
-              weight: -1
-              args:
-                - base
-                - run
-            - name: prule
-              weight: 2
-              args:
-                - sensitive
-                - run
-            - name: l1reg
-              weight: -0.00001
-              args:
-                - run
+          - fairobjective
           - tfsgd
     aspects:
       spectrum: symmetric
       norm: 1
       coefficients: coefficients
-      sweep_offset: 1
+      sweep_offset: max
