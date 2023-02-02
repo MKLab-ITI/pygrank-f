@@ -1,0 +1,80 @@
+---
+  - name: coefficients
+    default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85
+
+  - name: exclude
+    default: None
+
+  - name: fairobjective
+    default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective
+
+  - name: base
+    steps:
+      - name: train
+      - name: filter
+      - name: normalize
+    aspects:
+      spectrum: symmetric
+      norm: 1
+      coefficients: coefficients
+
+  - name: lfpro
+    steps:
+      - name: train
+      - name: lfpro
+        args:
+          - sensitive
+      - name: normalize
+    aspects:
+      norm: 1
+
+  - name: nn
+    steps:
+      - name: neural
+        args:
+          - train
+          - base
+          - sensitive
+      - name: normalize
+      - name: tune
+        args:
+          - fairobjective
+          - tfsgd
+    aspects:
+      norm: 1
+
+  - name: fp
+    steps:
+      - name: culep
+        args:
+          - train
+          - base
+          - sensitive
+      - name: filter
+      - name: normalize
+      - name: tune
+        args:
+          - fairobjective
+    aspects:
+      spectrum: symmetric
+      norm: 1
+      coefficients: coefficients
+
+
+  - name: nsgff
+    steps:
+      - name: neural
+        args:
+          - train
+          - base
+          - sensitive
+      - name: filter
+      - name: normalize
+      - name: tune
+        args:
+          - fairobjective
+          - tfsgd
+    aspects:
+      spectrum: symmetric
+      norm: 1
+      coefficients: coefficients

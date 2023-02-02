@@ -1,5 +1,6 @@
 from pyfop import *
 from pygrankf.core import backend, GraphSignal, to_signal
+from typing import Union
 
 
 @lazy_no_cache
@@ -11,14 +12,14 @@ def normalize(signal: GraphSignal, norm=None) -> GraphSignal:
     return signal / norm_value
 
 
-def sweep(original: GraphSignal):
+def sweep(original: GraphSignal, desired: Union[float, GraphSignal] = 1.):
     @lazy_no_cache
     @autoaspects
-    def ratio(signal: GraphSignal, original: GraphSignal) -> GraphSignal:
-        return signal / original
+    def ratio(signal: GraphSignal, original: GraphSignal, desired: Union[float, GraphSignal], sweep_offset=0) -> GraphSignal:
+        return (signal+sweep_offset) * desired / (original+sweep_offset)
 
     def method(signal):
-        return ratio(signal, original)
+        return ratio(signal, original, desired)
 
     return method
 
@@ -28,8 +29,12 @@ def fairmult(sensitive: GraphSignal, exclude: GraphSignal = None):
     @autoaspects
     def method(original: GraphSignal, prule: float = 1):
         s = sensitive.filter(exclude)
-        mean_sensitive = backend.sum(original * s) / backend.sum(s)
-        mean_non_sensitive = backend.sum(original * (1 - s)) / backend.sum(1 - s)
+        sum_sensitive = backend.sum(original * s)
+        sum_non_sensitive = backend.sum(original * (1 - s))
+        if sum_non_sensitive == 0 or sum_sensitive == 0:
+            return original
+        mean_sensitive = sum_sensitive / backend.sum(s)
+        mean_non_sensitive = sum_non_sensitive / backend.sum(1 - s)
         ret = sensitive * original * prule + (1 - sensitive) * original * (
             mean_sensitive / mean_non_sensitive
         )

@@ -7,7 +7,19 @@
     aspects:
       spectrum: col
       norm: 1
-      coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85
+      coefficients: coefficients
+
+
+  - name: base symmetric
+    show: False
+    steps:
+      - name: train
+      - name: filter
+      - name: normalize
+    aspects:
+      spectrum: symmetric
+      norm: 1
+      coefficients: coefficients
 
   - name: lfpro
     steps:
@@ -31,6 +43,16 @@
       alpha: 0.85
       norm: 1
 
+  - name: mult
+    steps:
+      - name: train
+      - name: fairmult
+        args:
+          - sensitive
+      - name: normalize
+    aspects:
+      norm: 1
+
   - name: fp
     steps:
       - name: culep
@@ -42,26 +64,59 @@
       - name: normalize
       - name: tune
         args:
-          - https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective
+          - generator: metric
+            sum:
+            - name: l1
+              weight: -1
+              args:
+                - base
+                - run
+            - name: prule
+              weight: 2
+              args:
+                - sensitive
+                - run
     aspects:
       spectrum: col
       norm: 1
-      coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85
+      coefficients: coefficients
 
-  - name: nsf
+
+  - name: nsgff
     steps:
       - name: neural
         args:
           - train
           - base
+          - base symmetric
           - sensitive
       - name: filter
+      - name: sweep
+        args:
+          - base
+          - base symmetric
       - name: normalize
       - name: tune
         args:
-          - https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective
+          - generator: metric
+            sum:
+            - name: l1
+              weight: -1
+              args:
+                - base
+                - run
+            - name: prule
+              weight: 2
+              args:
+                - sensitive
+                - run
+            - name: l1reg
+              weight: -0.00001
+              args:
+                - run
           - tfsgd
     aspects:
-      spectrum: col
+      spectrum: symmetric
       norm: 1
-      coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85
+      coefficients: coefficients
+      sweep_offset: 1

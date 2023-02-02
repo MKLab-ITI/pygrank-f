@@ -42,7 +42,61 @@
       norm: 1
       coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.90
 
-  - name: nsf
+
+  - name: base HK1
+    show: False
+    steps:
+      - name: train
+      - name: filter
+      - name: normalize
+    aspects:
+      spectrum: symmetric
+      norm: 1
+      coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/HK1
+
+
+  - name: transfer
+    steps:
+      - name: neural
+        args:
+          - train
+          - base
+          - base HK1
+          - sensitive
+      - name: filter
+      - name: sweep
+        args:
+          - base
+          - base HK1
+      - name: normalize
+      - name: tune
+        args:
+          - generator: metric
+            sum:
+            - name: l1
+              weight: -1
+              args:
+                - base
+                - run
+            - name: prule
+              weight: 2
+              args:
+                - sensitive
+                - run
+            - name: l1reg
+              weight: -0.00001
+              args:
+                - run
+          - tfsgd
+    aspects:
+      spectrum: symmetric
+      norm: 1
+      coefficients: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/HK1
+      sweep_offset: 1
+
+
+
+  - name: nsgff
     steps:
       - name: neural
         args:

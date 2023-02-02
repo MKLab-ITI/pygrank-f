@@ -1,17 +1,28 @@
 ---
   - name: fair community recommendation
     datasets:
+      - name: citeseer
+        min_members: 20
+        summary: True
+        show: False
+        communities:
+          sensitive: gender
       - name: pokec
         min_members: 20
-        skip: False
+        skip: True
+        summary: True
         communities:
           sensitive: gender
       - name: facebook01
         min_members: 20
+        summary: True
+        show: False
         communities:
           sensitive: 1
       - name: highschool
         min_members: 20
+        summary: True
+        show: False
         communities:
           ignore: M
           sensitive: F

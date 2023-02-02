@@ -10,6 +10,10 @@ def experiments(algorithms: Union[str, dict], **kwargs):
 
 
 def _parsearg(values, arg, update=False):
+    if isinstance(arg, str) and arg in values:
+        arg = values[arg]
+    if not isinstance(arg, str) and not isinstance(arg, dict):
+        return arg
     if isinstance(arg, str) and ".yaml/" in arg:
         file, arg = arg.split(".yaml/")
         arg = _loadyaml(file + ".yaml", update)[arg]
@@ -61,6 +65,12 @@ def run(algorithms: Union[str, dict], update=False, **kwargs):
     results = dict()
     values = {k: v for k, v in kwargs.items()}
     for alg in algorithms:
+        if "default" in alg:
+            if alg["name"] not in values:
+                values[alg["name"]] = alg["default"]
+            continue
+        if alg["name"] in values:
+            continue
         steps = list()
         for step in alg["steps"]:
             func = (
@@ -82,6 +92,7 @@ def run(algorithms: Union[str, dict], update=False, **kwargs):
                 for k, v in alg["aspects"].items()
             }
         )
-        results[alg["name"]] = result
         values[alg["name"]] = result
+        if alg.get("show", "True") == "True":
+            results[alg["name"]] = result
     return results

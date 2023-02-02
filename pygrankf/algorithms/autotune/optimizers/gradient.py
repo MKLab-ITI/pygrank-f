@@ -34,7 +34,7 @@ def tfsgd(
                 best_params = [float(value.numpy()) for value in parameters]
             optimizer.apply_gradients(zip(gradients, parameters))
             optimizer2.apply_gradients(zip(gradients, parameters))
-            #for var, mm, mx in zip(parameters, min_vals, max_vals):
+            # for var, mm, mx in zip(parameters, min_vals, max_vals):
             #    if var < mm:
             #        var.assign(mm)
             #    if var > mx:

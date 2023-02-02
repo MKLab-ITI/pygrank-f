@@ -7,15 +7,15 @@
         args:
           - base
           - run
-        - name: prule
-          weight: 2
-          args:
-            - sensitive
-            - run
-        - name: l1reg
-          weight: -0.00001
-          args:
-            - run
+      - name: prule
+        weight: 2
+        args:
+          - sensitive
+          - run
+      - name: l1reg
+        weight: -0.00001
+        args:
+          - run
 
   HK1:
     generator: HeatKernels

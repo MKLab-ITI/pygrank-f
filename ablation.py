@@ -1,10 +1,11 @@
+import sys
+sys.stderr = open('err.txt', 'w')
 import pygrankf as pgf
+import tensorflow as tf
 
 
-#experiments = pgf.experiments("experiments/algorithms/ablation.yaml")
-#pgf.benchmark("experiments/fairness/test.yaml", experiments, delim="&", endl="\\\\\n")
-
-pgf.benchmark("experiments/fairness/diffusion.yaml",
-              "experiments/algorithms/fairppr.yaml",
-              update=False,
-              delim="&", endl="\\\\\n")
+with tf.device('cpu'):
+    for coefficients in [pgf.PageRank(0.85), pgf.PageRank(0.90), pgf.HeatKernels(1), pgf.HeatKernels(3)]:
+        algorithms = pgf.experiments("experiments/algorithms/fairsym.yaml", coefficients=coefficients)
+        pgf.benchmark("experiments/fairness/links.yaml", algorithms,
+                      update=False, delim="&", endl="\\\\\n", total=True)

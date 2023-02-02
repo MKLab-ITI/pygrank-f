@@ -42,9 +42,10 @@ def neural(*inputs, layers=3, width=None, parameter_range=(-100, 100)):
         for i in range(shape[1]):
             first_params.append(0)
         sigma = (2 / shape[1]) ** 0.5
-        sigma = sigma / (1-2/math.pi)**0.5  # folded normal distribution
+        sigma = sigma / (1 - 2 / math.pi) ** 0.5  # folded normal distribution
         for i in range(shape[0]):
             for j in range(shape[1]):
+                # first_params.append(np.random.normal(sigma)/1.2)
                 first_params.append(abs(np.random.normal(sigma)))
                 # first_params.append(6**0.5 / shape[1])  # (random())*12**0.5/shape[1])
     first_params.reverse()
