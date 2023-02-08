@@ -1,5 +1,5 @@
 from typing import Union
-from pygrankf.benchmarks.benchmark import _loadyaml
+from pygrankf.benchmarks.benchmark import _loadyaml, _str2list
 
 
 def experiments(algorithms: Union[str, dict], **kwargs):
@@ -12,6 +12,8 @@ def experiments(algorithms: Union[str, dict], **kwargs):
 def _parsearg(values, arg, update=False):
     if isinstance(arg, str) and arg in values:
         arg = values[arg]
+    if isinstance(arg, dict) and arg.get("type", "None") == "dict":
+        return arg
     if not isinstance(arg, str) and not isinstance(arg, dict):
         return arg
     if isinstance(arg, str) and ".yaml/" in arg:
@@ -26,12 +28,16 @@ def _parsearg(values, arg, update=False):
     generator = arg["generator"]
     if not callable(generator):
         generator = getattr(pgf, generator)
-    if "args" in arg:
+    if "args" in arg or "kwargs" in arg:
         return generator(
             *[
                 a if a not in values else _parsearg(values, a, update)
-                for a in arg["args"]
-            ]
+                for a in _str2list(arg.get("args", []))
+            ],
+            **{
+                k: a if a not in values else _parsearg(values, a, update)
+                for k, a in arg.get("kwargs", {}).items()
+            }
         )
     return generator(arg, values)
 
@@ -46,7 +52,10 @@ def metric(instructions: dict, values: dict):
         result = 0
         for element in instructions["sum"]:
             func = getattr(pgf, element["name"])
-            value = func(*[localvalues[arg] for arg in element["args"]])
+            value = func(
+                *[localvalues[arg] for arg in _str2list(element.get("args", []))],
+                **{k: localvalues[arg] for k, arg in element.get("kwargs", {}).items()}
+            )
             if "min" in element:
                 value = max(value, element["min"])
             if "max" in element:
@@ -55,6 +64,38 @@ def metric(instructions: dict, values: dict):
         return result
 
     return compute
+
+
+def _runalg(alg, pgf, values, update):
+    # runs algorithm once
+    steps = list()
+    for step in alg["steps"]:
+        func = (
+            getattr(pgf, step["name"])
+            if hasattr(pgf, step["name"])
+            else values[step["name"]]
+        )
+        if "args" in step or "kwargs" in step:
+            func = func(
+                *[_parsearg(values, arg, update) for arg in _str2list(step.get("args", []))],
+                **{
+                    k: _parsearg(values, arg, update)
+                    for k, arg in step.get("kwargs", {}).items()
+                }
+            )
+        steps.append(func)
+    result = pgf.steps(*steps)
+    result = result.call(
+        **{
+            k: v
+            if not isinstance(v, dict)
+               and v not in values
+               and (not isinstance(v, str) or ".yaml" not in v)
+            else _parsearg(values, v, update)
+            for k, v in alg["aspects"].items()
+        }
+    )
+    return result
 
 
 def run(algorithms: Union[str, dict], update=False, **kwargs):
@@ -68,30 +109,37 @@ def run(algorithms: Union[str, dict], update=False, **kwargs):
         if "default" in alg:
             if alg["name"] not in values:
                 values[alg["name"]] = alg["default"]
+                if "get" in alg:
+                    values[alg["default"]] = getattr(values[alg["get"].split(".")[0]], alg["get"].split(".")[1])
             continue
         if alg["name"] in values:
             continue
-        steps = list()
-        for step in alg["steps"]:
-            func = (
-                getattr(pgf, step["name"])
-                if hasattr(pgf, step["name"])
-                else values[step["name"]]
-            )
-            if "args" in step:
-                func = func(*[_parsearg(values, arg, update) for arg in step["args"]])
-            steps.append(func)
-        result = pgf.steps(*steps)
-        result = result.call(
-            **{
-                k: v
-                if not isinstance(v, dict)
-                and v not in values
-                and (not isinstance(v, str) or ".yaml" not in v)
-                else _parsearg(values, v, update)
-                for k, v in alg["aspects"].items()
-            }
-        )
+        if "spawn" in alg:
+            metric = _parsearg(values, alg["spawn"]["select"], update)
+            hyperparameters = {k: _str2list(v) for k, v in alg["spawn"]["hyperparameters"].items()}
+            searchparameters = alg["spawn"].get("search", {})
+            finalparameters = alg["spawn"].get("final", {})
+            result = None
+            best_value = float("-inf")
+            best_params = None
+            from itertools import product
+            for hyperparameter_values in product(*list(hyperparameters.values())):
+                hyperparameter_kwargs = {k: v for k, v in zip(hyperparameters.keys(), hyperparameter_values)}
+                pgf.utils.prefix(alg["name"]+" "+str(searchparameters)+" "+str(hyperparameter_kwargs)+" ")
+                tmp_result = _runalg(alg, pgf, values | hyperparameter_kwargs | searchparameters, update)
+                value = metric(None, tmp_result, None)
+                if value > best_value:
+                    best_value = value
+                    best_params = hyperparameter_kwargs
+                    result = tmp_result
+            if finalparameters or finalparameters:
+                pgf.utils.prefix(alg["name"]+" "+str(finalparameters)+" "+str(best_params)+" ")
+                result = _runalg(alg, pgf, values | best_params | finalparameters, update)
+            pgf.utils.prefix()
+        else:
+            pgf.utils.prefix(alg["name"] + " ")
+            result = _runalg(alg, pgf, values, update)
+            pgf.utils.prefix()
         values[alg["name"]] = result
         if alg.get("show", "True") == "True":
             results[alg["name"]] = result

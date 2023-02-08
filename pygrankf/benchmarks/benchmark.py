@@ -4,6 +4,14 @@ import os
 import wget
 
 
+def _str2list(obj):
+    if isinstance(obj, str):
+        ret = [v.strip() for v in obj.split(",")]
+        ret = [int(v) if v.isdigit() else float(v) if v.replace(".", "", 1).replace("E", "", 1).replace("-", "").isdigit() else v for v in ret]
+        return ret
+    return obj
+
+
 def _loadyaml(path, update=False):
     if path.startswith("https://"):
         download_path = os.path.join(
@@ -155,8 +163,9 @@ def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwar
                         variables["run"] = results
                         for metric in setting["community"]["metrics"]:
                             func = getattr(pgf, metric["name"])
-                            args = [variables[arg] for arg in metric["args"]]
-                            line.append(func(*args))
+                            args = [variables[arg] for arg in _str2list(metric.get("args", []))]
+                            kwargs = {k: variables[arg] for k, arg in metric.get("kwargs", {}).items()}
+                            line.append(func(*args, **kwargs))
                     if total is not None and summary is None:
                         if len(total) == 0:
                             total = ["total".ljust(30)] + [

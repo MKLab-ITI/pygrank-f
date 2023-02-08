@@ -18,7 +18,6 @@
         min_members: 20
         summary: True
         show: False
-        skip: True
         communities:
           sensitive: AI
       - name: polbooks

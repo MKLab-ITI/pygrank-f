@@ -6,10 +6,27 @@ from typing import Union
 @lazy_no_cache
 @autoaspects
 def normalize(signal: GraphSignal, norm=None) -> GraphSignal:
-    if norm is None:
+    if norm is None or norm == "None":
         return signal / backend.max(signal)
     norm_value = backend.sum(signal**norm) ** (1.0 / norm)
     return signal / norm_value
+
+
+def transfernorm(original: GraphSignal):
+    @lazy_no_cache
+    @autoaspects
+    def renormalize(signal, transfernorm=None):
+        norm = transfernorm
+        if norm is None or norm == "None":
+            return signal / backend.max(signal) * backend.max(original)
+        #norm_value = backend.sum(signal**norm) ** (1.0 / norm)
+        norm_original = backend.sum(original ** norm) ** (1.0 / norm)
+        return signal / norm_original
+
+    def method(signal):
+        return renormalize(signal)
+
+    return method
 
 
 def sweep(original: GraphSignal, desired: Union[float, GraphSignal] = 1.0):
@@ -19,16 +36,32 @@ def sweep(original: GraphSignal, desired: Union[float, GraphSignal] = 1.0):
         signal: GraphSignal,
         original: GraphSignal,
         desired: Union[float, GraphSignal],
-        sweep_offset: Union[float, str] = 0,
+        sweep_offset: float = 0,
     ) -> GraphSignal:
-        if sweep_offset == "max":
-            sweep_offset = backend.max(original)
+        if sweep_offset != 0:
+            sweep_offset *= backend.max(original)
         if sweep_offset < 0:
-            raise Exception("Negative sweep offset")
+            raise Exception("Negative sweep offset or original signal max")
         return (signal + sweep_offset) * desired / (original + sweep_offset)
 
     def method(signal):
         return ratio(signal, original, desired)
+
+    return method
+
+
+def offset(original: GraphSignal, desired: Union[float, GraphSignal] = 0):
+    @lazy_no_cache
+    @autoaspects
+    def difference(
+        signal: GraphSignal,
+        original: GraphSignal,
+        desired: Union[float, GraphSignal],
+    ) -> GraphSignal:
+        return signal + desired - original
+
+    def method(signal):
+        return difference(signal, original, desired)
 
     return method
 

@@ -5,12 +5,14 @@
         min_members: 20
         summary: True
         show: False
+        skip: True
         communities:
           sensitive: 1
       - name: highschool
         min_members: 20
         summary: True
         show: False
+        skip: True
         communities:
           ignore: M
           sensitive: F
@@ -18,6 +20,7 @@
         min_members: 20
         summary: True
         show: False
+        skip: True
         communities:
           sensitive: AI
       - name: polbooks

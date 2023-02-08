@@ -6,7 +6,7 @@
     default: None
 
   - name: fairobjective
-    default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective
+    default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective2
 
   - name: base
     steps:
@@ -22,59 +22,57 @@
     steps:
       - name: train
       - name: lfpro
-        args:
-          - sensitive
+        args: sensitive
       - name: normalize
     aspects:
       norm: 1
 
-  - name: nn
+  - name: mult
     steps:
-      - name: neural
-        args:
-          - train
-          - base
-          - sensitive
+      - name: train
+      - name: fairmult
+        args: sensitive
       - name: normalize
-      - name: tune
-        args:
-          - fairobjective
-          - tfsgd
     aspects:
       norm: 1
 
   - name: fp
     steps:
       - name: culep
-        args:
-          - train
-          - base
-          - sensitive
+        args: train, base, sensitive
       - name: filter
       - name: normalize
       - name: tune
-        args:
-          - fairobjective
+        args: fairobjective
     aspects:
       spectrum: symmetric
       norm: 1
       coefficients: coefficients
-
 
   - name: nsgff
+    spawn:
+      hyperparameters:
+        layers: 3, 4, 5, 6, 7, 8, 9
+      select: fairobjective
+      search:
+        tuneparams:
+          type: dict
+          patience: 10
+      final:
+        tuneparams:
+          type: dict
+          patience: 100
     steps:
       - name: neural
-        args:
-          - train
-          - base
-          - sensitive
+        args: train, base, sensitive
+        kwargs:
+          layers: layers
       - name: filter
       - name: normalize
       - name: tune
-        args:
-          - fairobjective
-          - tfsgd
+        args: fairobjective, tfsgd
     aspects:
       spectrum: symmetric
       norm: 1
       coefficients: coefficients
+

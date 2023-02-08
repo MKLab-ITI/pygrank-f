@@ -5,6 +5,10 @@
   - name: fairobjective
     default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective2
 
+  - name: alpha
+    default: 0.85  # will be replaced by coefficients.alpha when possible
+    get: coefficients.alpha
+
   - name: base
     steps:
       - name: train
@@ -27,12 +31,20 @@
       norm: 1
       coefficients: coefficients
 
+  - name: base symmetric without norm
+    show: False
+    steps:
+      - name: train
+      - name: filter
+    aspects:
+      spectrum: symmetric
+      coefficients: coefficients
+
   - name: lfpro
     steps:
       - name: train
       - name: lfpro
-        args:
-          - sensitive
+        args: sensitive
       - name: normalize
     aspects:
       norm: 1
@@ -41,20 +53,17 @@
     steps:
       - name: train
       - name: lfprp
-        args:
-          - sensitive
-          - base
+        args: sensitive, base
       - name: normalize
     aspects:
-      alpha: 0.85
+      alpha: alpha
       norm: 1
 
   - name: mult
     steps:
       - name: train
       - name: fairmult
-        args:
-          - sensitive
+        args: sensitive
       - name: normalize
     aspects:
       norm: 1
@@ -62,40 +71,47 @@
   - name: fp
     steps:
       - name: culep
-        args:
-          - train
-          - base
-          - sensitive
+        args: train, base, sensitive
       - name: filter
       - name: normalize
       - name: tune
-        args:
-          - fairobjective
+        args: fairobjective
     aspects:
       spectrum: col
       norm: 1
       coefficients: coefficients
 
   - name: nsgff
+    spawn:
+      hyperparameters:
+        layers: 3, 4, 5, 6, 7, 8, 9
+        sweep_offset: "10"
+      select: fairobjective
+      search:
+        tuneparams:
+          type: dict
+          patience: 10
+      final:
+        tuneparams:
+          type: dict
+          patience: 100
     steps:
       - name: neural
-        args:
-          - train
-          - base
-          - base symmetric
-          - sensitive
+        args: train, base, base symmetric, sensitive
+        kwargs:
+          layers: layers
       - name: filter
+      - name: transfernorm
+        args: base symmetric without norm
       - name: sweep
-        args:
-          - base
-          - base symmetric
+        args: base, base symmetric
       - name: normalize
       - name: tune
-        args:
-          - fairobjective
-          - tfsgd
+        args: fairobjective, tfsgd
     aspects:
       spectrum: symmetric
+      transfernorm: 1
       norm: 1
       coefficients: coefficients
-      sweep_offset: max
+      sweep_offset: sweep_offset
+      tuneparams: tuneparams
