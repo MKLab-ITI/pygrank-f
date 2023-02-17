@@ -15,6 +15,7 @@ def load(
     directed: bool = False,
     min_members: float = 0.01,
     num_groups: int = 20,
+    subset: int = None,
     download=resources.download,
 ):
     download(dataset)
@@ -22,12 +23,16 @@ def load(
     utils.log(f"Loading {dataset} graph")
     G = Fastgraph(directed=directed)
     groupdict = {}
+    subset = float('inf') if subset is None else subset
     with open(path + "/" + dataset + "/" + pairs, "r", encoding="utf-8") as file:
         for line in file:
             if len(line) != 0 and line[0] != "#":
                 splt = line[:-1].split()
                 if len(splt) > 1:
                     G.add_edge(splt[0], splt[1])
+                subset -= 1
+                if subset <= 0:
+                    break
     if min_members < 1:
         min_members *= len(G)
 

@@ -2,7 +2,6 @@ from pyfop import *
 from pygrankf import backend
 from pygrankf.core import GraphSignal
 from pygrankf.algorithms.utils import Convergence, reweigh
-from pygrankf.algorithms.autotune.autogf import Tunable
 from typing import Iterable
 
 

@@ -28,12 +28,15 @@ class Backend:
         self.mod_name = mod_name
 
     def __enter__(self):
-        self._previous_backend = backend_name()
-        load_backend(self.mod_name)
+        if self.mod_name != backend_name():
+            self._previous_backend = backend_name()
+            load_backend(self.mod_name)
+            return _imported_mods[self.mod_name]
         return _imported_mods[self.mod_name]
 
     def __exit__(self, *args, **kwargs):
-        load_backend(self._previous_backend)
+        if self._previous_backend != backend_name():
+            load_backend(self._previous_backend)
         return False
 
 
@@ -42,6 +45,7 @@ def load_backend(mod_name):
         "pytorch",
         "numpy",
         "tensorflow",
+        "tensorflow_dense",
         "torch_sparse",
         "matvec",
         "sparse_dot_mkl",
@@ -129,6 +133,7 @@ def get_backend_preference():  # pragma: no cover
 
     if mod_name not in [
         "tensorflow",
+        "tensorflow_dense",
         "numpy",
         "pytorch",
         "torch_sparse",
@@ -178,7 +183,7 @@ def _notify_load(mod_name):
         f'The default pygrank backend has been set to "{mod_name}" '
         + "by the file "
         + os.path.join(os.path.expanduser("~"), ".pygrank", "config.json")
-        + '\nSet your preferred backend as one of ["numpy", "pytorch", "tensorflow", "torch_sparse", "matvec", "sparse_dot_mkl"] '
+        + '\nSet your preferred backend as one of ["numpy", "pytorch", "tensorflow", "tensorflow_dense", "torch_sparse", "matvec", "sparse_dot_mkl"] '
         'and "reminder": false in that file to remove this message from future runs.',
         file=sys.stderr,
     )

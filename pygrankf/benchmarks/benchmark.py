@@ -72,7 +72,7 @@ def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwar
         settings = _loadyaml(settings, update)
     total = list() if total else None
     for setting in settings:
-        pgf.print("\n" + "-" * 10 + " " + setting["name"] + " " + "-" * 10 + "\n")
+        pgf.print("\n" + "-" * 10 + " " + setting["name"] + " " + "-" * 10)
         line = None
         for dataset in setting["datasets"]:
             summary = list() if dataset.get("summary", False) else None
@@ -82,17 +82,25 @@ def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwar
                 dataset["name"],
                 min_members=dataset.get("min_members", 0.01),
                 num_groups=dataset.get("num_groups", 20),
+                subset=dataset.get("subset", None)
             )
+            communitiesstr = {str(k): v for k, v in communities.items()}
             named_communities = {
-                label: communities[name]
+                label: 1-communitiesstr[name[:-1]] if isinstance(name, str) and name.endswith("*") else communities[name]
                 for label, name in dataset["communities"].items()
             }
             hide_community_names = set(dataset["communities"].values())
-            communities = {
-                name: signal
-                for name, signal in communities.items()
-                if name not in hide_community_names
-            }
+            if "keep" in dataset:
+                communities = {
+                    name: communities[name]
+                    for name in dataset["keep"].split(",")
+                }
+            else:
+                communities = {
+                    name: signal
+                    for name, signal in communities.items()
+                    if name not in hide_community_names
+                }
             for split in setting["community"]["splits"]:
                 if split.get("skip", "False") == "True":
                     continue

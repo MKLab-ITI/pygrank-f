@@ -8,8 +8,8 @@
       - name: prule
         weight: 2
         args: sensitive, run
-      - name: l1reg
-        weight: -0.00001
+      - name: l1scalereg
+        weight: -2
         args: run
 
   fairobjective10:
@@ -21,8 +21,8 @@
       - name: prule
         weight: 10
         args: sensitive, run
-      - name: l1reg
-        weight: -0.00001
+      - name: l1scalereg
+        weight: -2
         args: run
 
   fairconstraint2:
@@ -35,8 +35,8 @@
         weight: 2
         max: 0.8
         args: sensitive, run
-      - name: l1reg
-        weight: -0.00001
+      - name: l1scalereg
+        weight: -2
         args: run
 
   fairconstraint10:
@@ -49,8 +49,8 @@
         weight: 10
         max: 0.8
         args: sensitive, run
-      - name: l1reg
-        weight: -0.00001
+      - name: l1scalereg
+        weight: -2
         args: run
 
   HK1:

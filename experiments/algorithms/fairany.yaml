@@ -2,9 +2,6 @@
   - name: coefficients
     default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85
 
-  - name: exclude
-    default: None
-
   - name: fairobjective
     default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective2
 
@@ -18,11 +15,31 @@
       norm: 1
       coefficients: coefficients
 
-  - name: lfpro
+
+  - name: base symmetric
+    show: False
     steps:
       - name: train
-      - name: lfpro
       - name: filter
+      - name: normalize
+    aspects:
+      spectrum: symmetric
+      norm: 1
+      coefficients: coefficients
+
+  - name: base symmetric without norm
+    show: False
+    steps:
+      - name: train
+      - name: filter
+    aspects:
+      spectrum: symmetric
+      coefficients: coefficients
+
+  - name: lfpro
+    steps:
+      - name: base
+      - name: lfpro
         args: sensitive
       - name: normalize
     aspects:
@@ -54,26 +71,35 @@
     spawn:
       hyperparameters:
         layers: 3, 4, 5, 6, 7, 8, 9
+        sweep_offset: "10"
       select: fairobjective
       search:
         tuneparams:
           type: dict
           patience: 10
+          epochs: 500
       final:
         tuneparams:
           type: dict
           patience: 100
+          epochs: 5000
     steps:
       - name: neural
-        args: train, base, sensitive
+        args: train, base, base symmetric, sensitive
         kwargs:
           layers: layers
       - name: filter
+      - name: transfernorm
+        args: base symmetric without norm
+      - name: sweep
+        args: base, base symmetric
       - name: normalize
       - name: tune
         args: fairobjective, tfsgd
     aspects:
       spectrum: symmetric
+      transfernorm: 1
       norm: 1
       coefficients: coefficients
-
+      sweep_offset: sweep_offset
+      tuneparams: tuneparams

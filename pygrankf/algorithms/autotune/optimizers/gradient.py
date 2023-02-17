@@ -1,6 +1,5 @@
 from pygrankf.core import backend, utils
 
-
 def tfsgd(
     loss,
     max_vals,
@@ -32,8 +31,9 @@ def tfsgd(
             if best_loss > epoch_loss + tol:
                 utils.log(f"Epoch {epoch} loss {float(epoch_loss)}")
                 best_loss = epoch_loss
-                curr_patience = patience
+                #if best_params is None or patience < curr_patience-2:
                 best_params = [float(value.numpy()) for value in parameters]
+                curr_patience = patience
             optimizer.apply_gradients(zip(gradients, parameters))
             #optimizer2.apply_gradients(zip(gradients, parameters))
             # for var, mm, mx in zip(parameters, min_vals, max_vals):

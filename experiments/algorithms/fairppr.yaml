@@ -42,7 +42,7 @@
 
   - name: lfpro
     steps:
-      - name: train
+      - name: base
       - name: lfpro
         args: sensitive
       - name: normalize
@@ -61,7 +61,7 @@
 
   - name: mult
     steps:
-      - name: train
+      - name: base
       - name: fairmult
         args: sensitive
       - name: normalize
@@ -91,10 +91,12 @@
         tuneparams:
           type: dict
           patience: 10
+          epochs: 500
       final:
         tuneparams:
           type: dict
           patience: 100
+          epochs: 5000
     steps:
       - name: neural
         args: train, base, base symmetric, sensitive

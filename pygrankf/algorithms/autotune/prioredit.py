@@ -58,7 +58,7 @@ def neural(*inputs, layers=3, width=None, parameter_range=(-100, 100)):
     @lazy_no_cache
     @autoaspects
     def neural(*args, neuralparams=tunable):
-        neuralparams = neuralparams.copy()
+        neuralparams = [x for x in neuralparams]
         for shape in shapes:
             # start from biases
             next = [neuralparams.pop() for _ in range(shape[1])]

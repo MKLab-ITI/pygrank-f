@@ -5,38 +5,39 @@
         min_members: 20
         summary: True
         show: False
+        skip: True
         communities:
           sensitive: gender
       - name: pokec
+        subset: 100000
+        min_members: 20
+        skip: False
+        show: False
+        summary: True
+        keep: cooking,sports
+        communities:
+          sensitive: gender*
+          nonsensitive: gender
+      - name: facebook01
         min_members: 20
         skip: True
         summary: True
-        communities:
-          sensitive: gender
-      - name: facebook01
-        min_members: 20
-        summary: True
         show: False
         communities:
-          sensitive: 1
+          sensitive: 1*
+          nonsensitive: 1
       - name: highschool
         min_members: 20
         summary: True
         show: False
         communities:
-          ignore: M
+          nonsensitive: M
           sensitive: F
     community:
       splits:
-        - name: find 5
+        - name: find 50%
           seed: 0
           skip: True
-          variables:
-            train: -5
-            test: Remaining
-            exclude: None
-        - name: 50%
-          seed: 0
           variables:
             train: 0.5
             test: Remaining
@@ -46,7 +47,7 @@
           args:
             - test
             - run
-            - train
+            - sensitive
         - name: prule
           args:
             - sensitive
