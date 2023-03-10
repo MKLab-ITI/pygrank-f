@@ -2,7 +2,7 @@ import sys
 from pyfop.execution import PendingCall
 
 
-def print(*args, delim=" ", endl="\n"):
+def print(*args, delim=" ", endl="\n", file=None):
     args = [arg() if isinstance(arg, PendingCall) else arg for arg in args]
     ret = delim.join(
         f"{arg:.3f}".ljust(9)
@@ -10,5 +10,7 @@ def print(*args, delim=" ", endl="\n"):
         else (str(arg).ljust(9) if not isinstance(arg, str) or len(arg) != 1 else arg)
         for arg in args
     )
-    sys.stdout.write(ret + endl)
-    sys.stdout.flush()
+    if file is None:
+        file = sys.stdout
+    file.write(ret + endl)
+    file.flush()

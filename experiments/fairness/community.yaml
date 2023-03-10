@@ -2,12 +2,15 @@
   - name: fair community recommendation
     datasets:
       - name: citeseer
+        subset: 100000
         min_members: 20
-        summary: True
+        skip: False
         show: False
-        skip: True
+        summary: True
+        keep: "1"
         communities:
-          sensitive: gender
+          sensitive: 2
+          nonsensitive: 2*
       - name: pokec
         subset: 100000
         min_members: 20
@@ -30,14 +33,26 @@
         min_members: 20
         summary: True
         show: False
+        skip: False
         communities:
           nonsensitive: M
           sensitive: F
     community:
       splits:
+        - name: find 10%
+          seed: 0
+          variables:
+            train: 0.1
+            test: Remaining
+            exclude: None
+        - name: find 30%
+          seed: 0
+          variables:
+            train: 0.3
+            test: Remaining
+            exclude: None
         - name: find 50%
           seed: 0
-          skip: True
           variables:
             train: 0.5
             test: Remaining
@@ -47,7 +62,12 @@
           args:
             - test
             - run
-            - sensitive
+            - train
+            #- sensitive
+        - name: l1rel
+          args:
+            - base
+            - run
         - name: prule
           args:
             - sensitive

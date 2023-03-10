@@ -14,8 +14,10 @@ def culep(
     sensitive,
     culepa: list = Tunable([0, 0], [1, 1]),
     culepb: list = Tunable([-3, -3], [3, 3]),
-    culept: float = Tunable(0, 1),
+    culept: float = Tunable(1, 1),
 ):
+    personalization = personalization / backend.sum(personalization)
+    result = result / backend.sum(result)
     err = backend.abs(personalization - result)
     sensitive_branch = culepa[0] * backend.exp(-culepb[0] * err) + (
         1 - culepa[0]
@@ -24,6 +26,7 @@ def culep(
         1 - culepa[1]
     ) * backend.exp(culepb[1] * err)
     ret = sensitive * sensitive_branch + (1 - sensitive) * non_sensitive_branch
+    ret = ret / backend.sum(ret)
     return ret * culept + personalization * (1 - culept)
 
 
@@ -44,10 +47,11 @@ def neural(*inputs, layers=3, width=None, parameter_range=(-100, 100)):
         sigma = (2 / shape[1]) ** 0.5
         sigma = sigma / (1 - 2 / math.pi) ** 0.5  # folded normal distribution
         for i in range(shape[0]):
-            for j in range(shape[1]):
-                # first_params.append(np.random.normal(sigma)/1.2)
-                first_params.append(abs(np.random.normal(sigma)))
-                # first_params.append(6**0.5 / shape[1])  # (random())*12**0.5/shape[1])
+            first_params.append(1)
+            for j in range(shape[1]-1):
+                first_params.append(0)
+                #first_params.append(abs(np.random.normal(sigma)))
+                #first_params.append(np.random.normal(sigma))
     first_params.reverse()
     tunable = Tunable(
         [parameter_range[0]] * num_params,

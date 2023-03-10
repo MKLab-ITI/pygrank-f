@@ -106,41 +106,46 @@ def run(algorithms: Union[str, dict], update=False, **kwargs):
     results = dict()
     values = {k: v for k, v in kwargs.items()}
     for alg in algorithms:
-        if "default" in alg:
-            if alg["name"] not in values:
-                values[alg["name"]] = alg["default"]
-                if "get" in alg:
-                    values[alg["default"]] = getattr(values[alg["get"].split(".")[0]], alg["get"].split(".")[1])
-            continue
-        if alg["name"] in values:
-            continue
-        if "spawn" in alg:
-            metric = _parsearg(values, alg["spawn"]["select"], update)
-            hyperparameters = {k: _str2list(v) for k, v in alg["spawn"]["hyperparameters"].items()}
-            searchparameters = alg["spawn"].get("search", {})
-            finalparameters = alg["spawn"].get("final", {})
-            result = None
-            best_value = float("-inf")
-            best_params = None
-            from itertools import product
-            for hyperparameter_values in product(*list(hyperparameters.values())):
-                hyperparameter_kwargs = {k: v for k, v in zip(hyperparameters.keys(), hyperparameter_values)}
-                pgf.utils.prefix(alg["name"]+" "+str(searchparameters)+" "+str(hyperparameter_kwargs)+" ")
-                tmp_result = _runalg(alg, pgf, values | hyperparameter_kwargs | searchparameters, update)
-                value = metric(None, tmp_result, None)
-                if value > best_value:
-                    best_value = value
-                    best_params = hyperparameter_kwargs
-                    result = tmp_result
-            if finalparameters or finalparameters:
-                pgf.utils.prefix(alg["name"]+" "+str(finalparameters)+" "+str(best_params)+" ")
-                result = _runalg(alg, pgf, values | best_params | finalparameters, update)
-            pgf.utils.prefix()
-        else:
-            pgf.utils.prefix(alg["name"] + " ")
-            result = _runalg(alg, pgf, values, update)
-            pgf.utils.prefix()
-        values[alg["name"]] = result
-        if alg.get("show", "True") == "True":
-            results[alg["name"]] = result
+        try:
+            if "default" in alg:
+                if alg["name"] not in values:
+                    values[alg["name"]] = alg["default"]
+                    if "get" in alg:
+                        values[alg["default"]] = getattr(values[alg["get"].split(".")[0]], alg["get"].split(".")[1])
+                continue
+            if alg["name"] in values:
+                continue
+            if "spawn" in alg:
+                metric = _parsearg(values, alg["spawn"]["select"], update)
+                hyperparameters = {k: _str2list(v) for k, v in alg["spawn"]["hyperparameters"].items()}
+                searchparameters = alg["spawn"].get("search", {})
+                finalparameters = alg["spawn"].get("final", {})
+                result = None
+                best_value = float("-inf")
+                best_params = None
+                from itertools import product
+                for hyperparameter_values in product(*list(hyperparameters.values())):
+                    hyperparameter_kwargs = {k: v for k, v in zip(hyperparameters.keys(), hyperparameter_values)}
+                    pgf.utils.prefix(alg["name"]+" "+str(searchparameters)+" "+str(hyperparameter_kwargs)+" ")
+                    tmp_result = _runalg(alg, pgf, values | hyperparameter_kwargs | searchparameters, update)
+                    value = metric(None, tmp_result, None)
+                    if value > best_value:
+                        best_value = value
+                        best_params = hyperparameter_kwargs
+                        result = tmp_result
+                if finalparameters or finalparameters:
+                    pgf.utils.prefix(alg["name"]+" "+str(finalparameters)+" "+str(best_params)+" ")
+                    result = _runalg(alg, pgf, values | best_params | finalparameters, update)
+                pgf.utils.prefix()
+            else:
+                pgf.utils.prefix(alg["name"] + " ")
+                result = _runalg(alg, pgf, values, update)
+                pgf.utils.prefix()
+            values[alg["name"]] = result
+            if alg.get("show", "True") == "True":
+                results[alg["name"]] = result
+        except Exception as e:
+            import traceback
+            print("Error during execution of "+str(alg["name"])+": "+str(e))
+            traceback.print_exc()
     return results

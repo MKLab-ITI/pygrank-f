@@ -36,11 +36,11 @@ def tfsgd(
                 curr_patience = patience
             optimizer.apply_gradients(zip(gradients, parameters))
             #optimizer2.apply_gradients(zip(gradients, parameters))
-            # for var, mm, mx in zip(parameters, min_vals, max_vals):
-            #    if var < mm:
-            #        var.assign(mm)
-            #    if var > mx:
-            #        var.assign(mx)
+            """for var, mm, mx in zip(parameters, min_vals, max_vals):
+                if var < mm:
+                    var.assign(mm)
+                if var > mx:
+                    var.assign(mx)"""
             curr_patience -= 1
             if curr_patience == 0:
                 break

@@ -2,11 +2,11 @@
   - name: coefficients
     default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85
 
-  - name: exclude
-    default: None
-
   - name: fairobjective
     default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective2
+
+  - name : prule
+    default: 1
 
   - name: base
     steps:
@@ -18,15 +18,24 @@
       norm: 1
       coefficients: coefficients
 
-  - name: lfpro
+  - name: base symmetric without norm
+    show: False
     steps:
       - name: train
-      - name: lfpro
       - name: filter
+    aspects:
+      spectrum: symmetric
+      coefficients: coefficients
+
+  - name: lfpro
+    steps:
+      - name: base
+      - name: lfpro
         args: sensitive
       - name: normalize
     aspects:
       norm: 1
+      prule: prule
 
   - name: mult
     steps:
@@ -36,44 +45,62 @@
       - name: normalize
     aspects:
       norm: 1
+      prule: prule
 
   - name: fp
     steps:
       - name: culep
         args: train, base, sensitive
       - name: filter
+      - name: fairmult
+        args: sensitive
       - name: normalize
       - name: tune
         args: fairobjective
     aspects:
       spectrum: symmetric
       norm: 1
+      prule: prule
       coefficients: coefficients
 
   - name: nsgff
     spawn:
       hyperparameters:
         layers: 3, 4, 5, 6, 7, 8, 9
+        sweep_offset: "10"
       select: fairobjective
       search:
         tuneparams:
           type: dict
-          patience: 10
+          patience: 5
+          epochs: 50
+          learning_rate: 0.1
       final:
         tuneparams:
           type: dict
           patience: 100
+          epochs: 5000
+          learning_rate: 0.01
     steps:
       - name: neural
         args: train, base, sensitive
         kwargs:
           layers: layers
       - name: filter
+      - name: transfernorm
+        args: base symmetric without norm
+      - name: sweep
+        args: base, base
+      - name: fairmult
+        args: sensitive
       - name: normalize
       - name: tune
         args: fairobjective, tfsgd
     aspects:
       spectrum: symmetric
+      transfernorm: 1
       norm: 1
+      prule: prule
       coefficients: coefficients
-
+      sweep_offset: sweep_offset
+      tuneparams: tuneparams

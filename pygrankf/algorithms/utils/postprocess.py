@@ -6,7 +6,7 @@ from typing import Union
 @lazy_no_cache
 @autoaspects
 def normalize(signal: GraphSignal, norm=None) -> GraphSignal:
-    if norm is None or norm == "None":
+    if norm is None or norm == "None" or norm == "max":
         return signal / backend.max(signal)
     norm_value = backend.sum(signal**norm) ** (1.0 / norm)
     return signal / norm_value
@@ -17,7 +17,7 @@ def transfernorm(original: GraphSignal):
     @autoaspects
     def renormalize(signal, transfernorm=None):
         norm = transfernorm
-        if norm is None or norm == "None":
+        if norm is None or norm == "None" or norm == "max":
             return signal / backend.max(signal) * backend.max(original)
         #norm_value = backend.sum(signal**norm) ** (1.0 / norm)
         norm_original = backend.sum(original ** norm) ** (1.0 / norm)
@@ -38,6 +38,8 @@ def sweep(original: GraphSignal, desired: Union[float, GraphSignal] = 1.0):
         desired: Union[float, GraphSignal],
         sweep_offset: float = 0,
     ) -> GraphSignal:
+        if sweep_offset == -1:
+            return signal
         if sweep_offset != 0:
             sweep_offset *= backend.max(original)
         if sweep_offset < 0:
@@ -107,8 +109,13 @@ def lfpro(sensitive: GraphSignal, exclude: GraphSignal = None):
 
     @lazy_no_cache
     @autoaspects
-    def method(ranks: GraphSignal, eps=1.0e-12):
-        phi = backend.sum(sensitive) / backend.length(sensitive)
+    def method(ranks: GraphSignal, eps=1.0e-12, prule=1):
+        #phi = backend.sum(sensitive) / backend.length(sensitive)
+        phi = (
+                backend.sum(sensitive)
+                * prule
+                / (backend.length(sensitive) + backend.sum(sensitive) * (prule - 1))
+        )
         ranks = ranks / backend.sum(ranks)
         sumR = backend.sum(ranks * sensitive)
         sumB = backend.sum(ranks * (1 - sensitive))

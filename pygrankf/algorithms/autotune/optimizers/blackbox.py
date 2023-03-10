@@ -27,7 +27,7 @@ def nonconvex(
     min_vals,
     starting_parameters,
     deviation_tol: float = 1.0e-9,
-    divide_range: float = 1.01,
+    divide_range: float = 2,
     partitions: int = 5,
     parameter_tol: float = float("inf"),
     depth: int = 1,
@@ -158,7 +158,8 @@ def nonconvex(
         prev_best_loss = best_loss
         best_loss = weights_loss
         best_weights = weights
-        range_deviations[curr_variable] = abs(prev_best_loss - best_loss)
+        #range_deviations[curr_variable] = abs(prev_best_loss - best_loss)
+        range_deviations[curr_variable] = max(v[1] for v in loss_pairs) - min(v[1] for v in loss_pairs)
         if verbose:
             utils.log(
                 f"Tuning evaluations {evals} loss {best_loss:.8f} +- {max(range_deviations):.8f}"

@@ -1,50 +1,28 @@
 ---
-  - name: test
+  - name: test (for ablation study)
     datasets:
       - name: citeseer
-        skip: True
-        summary: True
-        min_members: 20
-        communities:
-          sensitive: AI
-      - name: facebook01
-        skip: True
-        summary: True
-        min_members: 20
-        communities:
-          sensitive: 1
-      - name: highschool
+        subset: 100000
         min_members: 20
         skip: False
-        summary: True
+        show: True
+        summary: False
+        keep: "0"
         communities:
-          ignore: M
-          sensitive: F
+          sensitive: 2
+          nonsensitive: 2*
     community:
       splits:
-        - name: find 5
-          seed: 0
-          skip: True
+        - name: random
+          seed: 1
           variables:
-            train: -5
-            test: Remaining
-            exclude: None
-        - name: 50%
-          seed: 0
-          variables:
-            train: 0.5
-            test: Remaining
+            train: 0.5 #RandomPos # 1
             exclude: None
       metrics:
-        - name: l1
+        - name: l1rel
           args:
             - base
             - run
-        - name: auc
-          args:
-            - test
-            - run
-            - train
         - name: prule
           args:
             - sensitive

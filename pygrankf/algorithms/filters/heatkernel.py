@@ -9,7 +9,7 @@ class HeatKernels(Iterable[float]):
         class Iterator:
             def __init__(self, k):
                 self.k = k
-                self.i = 0
+                self.i = 1
                 self.factorial = 1
                 self.power = 1
 

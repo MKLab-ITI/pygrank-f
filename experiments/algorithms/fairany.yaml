@@ -3,7 +3,10 @@
     default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85
 
   - name: fairobjective
-    default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective2
+    default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective0
+
+  - name : prule
+    default: 1
 
   - name: base
     steps:
@@ -11,7 +14,7 @@
       - name: filter
       - name: normalize
     aspects:
-      spectrum: symmetric
+      spectrum: col
       norm: 1
       coefficients: coefficients
 
@@ -44,6 +47,7 @@
       - name: normalize
     aspects:
       norm: 1
+      prule: prule
 
   - name: mult
     steps:
@@ -53,6 +57,7 @@
       - name: normalize
     aspects:
       norm: 1
+      prule: prule
 
   - name: fp
     steps:
@@ -63,7 +68,7 @@
       - name: tune
         args: fairobjective
     aspects:
-      spectrum: symmetric
+      spectrum: col
       norm: 1
       coefficients: coefficients
 
@@ -71,7 +76,7 @@
     spawn:
       hyperparameters:
         layers: 3, 4, 5, 6, 7, 8, 9
-        sweep_offset: "10"
+        sweep_offset: 0.1, 0.3, 1, 3, 10
       select: fairobjective
       search:
         tuneparams:

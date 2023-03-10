@@ -26,6 +26,10 @@ def _loadyaml(path, update=False):
     return ret
 
 
+def loadyaml(path, update=False):
+    return _loadyaml(path, update)
+
+
 def characteristics(settings: Union[str, dict], update=False, **kwargs):
     import pygrankf as pgf
 
@@ -36,16 +40,31 @@ def characteristics(settings: Union[str, dict], update=False, **kwargs):
         for dataset in setting["datasets"]:
             if dataset.get("skip", False):
                 continue
+
             communities = pgf.load(
                 dataset["name"],
                 min_members=dataset.get("min_members", 0.01),
                 num_groups=dataset.get("num_groups", 20),
+                subset=dataset.get("subset", None)
             )
+            communitiesstr = {str(k): v for k, v in communities.items()}
             named_communities = {
-                label: communities[name]
+                label: 1 - communitiesstr[name[:-1]] if isinstance(name, str) and name.endswith("*") else
+                communitiesstr[str(name)]
                 for label, name in dataset["communities"].items()
             }
             hide_community_names = set(dataset["communities"].values())
+            if "keep" in dataset:
+                communities = {
+                    name: communitiesstr[str(name)]
+                    for name in dataset["keep"].split(",")
+                }
+            else:
+                communities = {
+                    name: signal
+                    for name, signal in communities.items()
+                    if name not in hide_community_names
+                }
             communities = {
                 name: signal
                 for name, signal in communities.items()
@@ -86,13 +105,13 @@ def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwar
             )
             communitiesstr = {str(k): v for k, v in communities.items()}
             named_communities = {
-                label: 1-communitiesstr[name[:-1]] if isinstance(name, str) and name.endswith("*") else communities[name]
+                label: 1-communitiesstr[name[:-1]] if isinstance(name, str) and name.endswith("*") else communitiesstr[str(name)]
                 for label, name in dataset["communities"].items()
             }
             hide_community_names = set(dataset["communities"].values())
             if "keep" in dataset:
                 communities = {
-                    name: communities[name]
+                    name: communitiesstr[str(name)]
                     for name in dataset["keep"].split(",")
                 }
             else:
@@ -101,8 +120,9 @@ def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwar
                     for name, signal in communities.items()
                     if name not in hide_community_names
                 }
+
             for split in setting["community"]["splits"]:
-                if split.get("skip", "False") == "True":
+                if split.get("skip", False):
                     continue
                 for community_name, community in communities.items():
                     # from pygrankf import backend
@@ -114,13 +134,21 @@ def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwar
                             variables[variable] = variables[fraction]
                         elif fraction == "None":
                             variables[variable] = None
+                        elif fraction == "All":
+                            variables[variable] = pgf.to_signal(
+                                community,
+                                {
+                                    v: 1 for v in community
+                                },  # this is for all graph nodes
+                            )
+                            community = variables[variable]
                         elif fraction == "RandomPos":
                             import random
 
                             variables[variable] = pgf.to_signal(
                                 community,
                                 {
-                                    v: random.random() for v in community
+                                    v: random.random()*community[v] for v in community
                                 },  # this is for all graph nodes
                             )
                         elif fraction == "Random":
@@ -129,7 +157,7 @@ def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwar
                             variables[variable] = pgf.to_signal(
                                 community,
                                 {
-                                    v: 2 * (random.random() - 0.5) for v in community
+                                    v: 2 * (random.random()*community[v] - 0.5) for v in community
                                 },  # this is for all graph nodes
                             )
                         elif fraction == "Remaining":
@@ -171,9 +199,9 @@ def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwar
                         variables["run"] = results
                         for metric in setting["community"]["metrics"]:
                             func = getattr(pgf, metric["name"])
-                            args = [variables[arg] for arg in _str2list(metric.get("args", []))]
-                            kwargs = {k: variables[arg] for k, arg in metric.get("kwargs", {}).items()}
-                            line.append(func(*args, **kwargs))
+                            runargs = [variables[arg] for arg in _str2list(metric.get("args", []))]
+                            runkwargs = {k: variables[arg] for k, arg in metric.get("kwargs", {}).items()}
+                            line.append(float(func(*runargs, **runkwargs)))
                     if total is not None and summary is None:
                         if len(total) == 0:
                             total = ["total".ljust(30)] + [
@@ -189,7 +217,7 @@ def benchmark(settings: Union[str, dict], run, update=False, total=False, **kwar
                         for i in range(1, len(line)):
                             summary[i].append(line[i])
                     # else:
-                    if dataset.get("show", "True") == "True":
+                    if dataset.get("show", True):
                         pgf.print(*line, **kwargs)
             if summary:
                 pgf.print(

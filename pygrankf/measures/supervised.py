@@ -49,9 +49,25 @@ def l1(
 
 
 @eager_no_cache
+def l1rel(
+    test: GraphSignal, prediction: GraphSignal, exclude: Optional[GraphSignal] = None
+) -> float:
+    assert test is not None
+    prediction = prediction.filter(exclude)
+    test = test.filter(exclude)
+    return backend.mean(backend.abs(prediction - test)*backend.safe_inv(test))
+
+
+@eager_no_cache
 def l1reg(prediction: GraphSignal, exclude: Optional[GraphSignal] = None) -> float:
     prediction = prediction.filter(exclude)
     return backend.sum(backend.abs(prediction))
+
+
+@eager_no_cache
+def l1scalereg(prediction: GraphSignal, exclude: Optional[GraphSignal] = None) -> float:
+    prediction = prediction.filter(exclude)
+    return backend.sum(backend.abs(prediction))/backend.length(prediction)/2
 
 
 @eager_no_cache

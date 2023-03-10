@@ -1,28 +1,33 @@
 ---
   - name: diffusion fairness (random)
     datasets:
-      - name: facebook01
+      - name: citeseer
+        subset: 100000
         min_members: 20
-        summary: True
+        skip: False
         show: False
-        skip: True
+        summary: True
+        keep: 0,1
         communities:
-          sensitive: 1
+          sensitive: 2
+          nonsensitive: 2*
+      - name: pokec
+        subset: 100000
+        min_members: 20
+        skip: False
+        show: False
+        summary: True
+        keep: cooking,sports
+        communities:
+          sensitive: gender*
+          nonsensitive: gender
       - name: highschool
         min_members: 20
         summary: True
         show: False
-        skip: True
         communities:
-          ignore: M
+          nonsensitive: M
           sensitive: F
-      - name: citeseer
-        min_members: 20
-        summary: True
-        show: False
-        skip: True
-        communities:
-          sensitive: AI
       - name: polbooks
         show: False
         summary: True
@@ -38,20 +43,26 @@
         - name: random
           seed: 0
           variables:
+            all: All
+            withhold: 0.3
             train: RandomPos
             exclude: None
         - name: random
           seed: 1
           variables:
+            all: All
+            withhold: 0.5
             train: RandomPos
             exclude: None
         - name: random
           seed: 2
           variables:
+            all: All
+            withhold: 0.7
             train: RandomPos
             exclude: None
       metrics:
-        - name: l1
+        - name: l1rel
           args:
             - base
             - run

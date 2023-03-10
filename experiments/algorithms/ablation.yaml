@@ -2,11 +2,14 @@
   - name: coefficients
     default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.85
 
-  - name: exclude
-    default: None
+  - name: appnpcoefficients
+    default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/PPR0.90
 
   - name: fairobjective
-    default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective2
+    default: https://raw.githubusercontent.com/maniospas/pygrank-f/main/experiments/algorithms/values.yaml/fairobjective0
+
+  - name : prule
+    default: 1
 
   - name: base
     steps:
@@ -18,61 +21,149 @@
       norm: 1
       coefficients: coefficients
 
-  - name: lfpro
+  - name: base symmetric without norm
+    show: False
     steps:
       - name: train
-      - name: lfpro
+      - name: filter
+    aspects:
+      spectrum: symmetric
+      coefficients: coefficients
+
+  - name: mult
+    steps:
+      - name: base
+      - name: fairmult
         args: sensitive
       - name: normalize
     aspects:
       norm: 1
+      prule: prule
 
   - name: nn
-    steps:
-      - name: neural
-        args: train, base, sensitive
-      - name: normalize
-      - name: tune
-        args: fairobjective, tfsgd
-    aspects:
-      norm: 1
-
-  - name: fp
-    steps:
-      - name: culep
-        args: train, base, sensitive
-      - name: filter
-      - name: normalize
-      - name: tune
-        args: fairobjective
-    aspects:
-      spectrum: symmetric
-      norm: 1
-      coefficients: coefficients
-
-  - name: nsgff
     spawn:
       hyperparameters:
         layers: 3, 4, 5, 6, 7, 8, 9
+        sweep_offset: 0.1, 0.3, 1, 3, 10
       select: fairobjective
       search:
         tuneparams:
           type: dict
-          patience: 10
+          patience: 5
+          epochs: 50
+          learning_rate: 0.1
       final:
         tuneparams:
           type: dict
           patience: 100
+          epochs: 5000
+          learning_rate: 0.01
+          tol: 0.00001
+    steps:
+      - name: neural
+        args: train, base, sensitive
+        kwargs:
+          layers: layers
+      - name: transfernorm
+        args: base symmetric without norm
+      - name: sweep
+        args: base, base
+      - name: fairmult
+        args: sensitive
+      - name: normalize
+      - name: tune
+        args: fairobjective, tfsgd
+    aspects:
+      transfernorm: 1
+      norm: 1
+      prule: prule
+      sweep_offset: sweep_offset
+      tuneparams: tuneparams
+
+  - name: appnp
+    spawn:
+      hyperparameters:
+        layers: 3, 4, 5, 6, 7, 8, 9
+        sweep_offset: 0.1, 0.3, 1, 3, 10
+      select: fairobjective
+      search:
+        tuneparams:
+          type: dict
+          patience: 5
+          epochs: 50
+          learning_rate: 0.1
+      final:
+        tuneparams:
+          type: dict
+          patience: 100
+          epochs: 5000
+          learning_rate: 0.01
+          tol: 0.00001
     steps:
       - name: neural
         args: train, base, sensitive
         kwargs:
           layers: layers
       - name: filter
+      - name: transfernorm
+        args: base symmetric without norm
+      - name: sweep
+        args: base, base
+      - name: fairmult
+        args: sensitive
       - name: normalize
       - name: tune
         args: fairobjective, tfsgd
     aspects:
       spectrum: symmetric
+      transfernorm: 1
+      maxiters: 10
       norm: 1
+      prule: prule
+      coefficients: appnpcoefficients
+      sweep_offset: sweep_offset
+      tuneparams: tuneparams
+
+
+  - name: nsgff
+    spawn:
+      hyperparameters:
+        layers: 3, 4, 5, 6, 7, 8, 9
+        sweep_offset: 0.1, 0.3, 1, 3, 10
+      select: fairobjective
+      search:
+        tuneparams:
+          type: dict
+          patience: 5
+          epochs: 50
+          learning_rate: 0.1
+      final:
+        tuneparams:
+          type: dict
+          patience: 100
+          epochs: 5000
+          learning_rate: 0.01
+          tol: 0.00001
+    steps:
+      - name: neural
+        args: train, base, sensitive
+        kwargs:
+          layers: layers
+      - name: filter
+      - name: transfernorm
+        args: base symmetric without norm
+      - name: sweep
+        args: base, base
+      - name: fairmult
+        args: sensitive
+      - name: normalize
+      - name: tune
+        args: fairobjective, tfsgd
+    aspects:
+      spectrum: symmetric
+      transfernorm: 1
+      norm: 1
+      prule: prule
       coefficients: coefficients
+      sweep_offset: sweep_offset
+      tuneparams: tuneparams

@@ -28,8 +28,8 @@ class Backend:
         self.mod_name = mod_name
 
     def __enter__(self):
+        self._previous_backend = backend_name()
         if self.mod_name != backend_name():
-            self._previous_backend = backend_name()
             load_backend(self.mod_name)
             return _imported_mods[self.mod_name]
         return _imported_mods[self.mod_name]

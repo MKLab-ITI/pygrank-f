@@ -12,7 +12,7 @@ def safe_div(a, b):
 
 # @lazy_no_cache
 # @autoaspects
-def lfprp(sensitive, original, prule=1):
+def lfprp(sensitive, original, prule: float = 1):
     phi = (
         backend.sum(sensitive)
         * prule

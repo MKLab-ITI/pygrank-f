@@ -1,8 +1,31 @@
 ---
+  fairobjective0:
+    generator: metric
+    sum:
+      - name: l1rel
+        weight: -1
+        args: base, run
+      - name: l1scalereg
+        weight: -2
+        args: run
+
+  fairobjective1:
+    generator: metric
+    sum:
+      - name: l1rel
+        weight: -1
+        args: base, run
+      - name: prule
+        weight: 1
+        args: sensitive, run
+      - name: l1scalereg
+        weight: -2
+        args: run
+
   fairobjective2:
     generator: metric
     sum:
-      - name: l1
+      - name: l1rel
         weight: -1
         args: base, run
       - name: prule
@@ -15,7 +38,7 @@
   fairobjective10:
     generator: metric
     sum:
-      - name: l1
+      - name: l1rel
         weight: -1
         args: base, run
       - name: prule
@@ -28,7 +51,7 @@
   fairconstraint2:
     generator: metric
     sum:
-      - name: l1
+      - name: l1rel
         weight: -1
         args: base, run
       - name: prule
@@ -42,7 +65,7 @@
   fairconstraint10:
     generator: metric
     sum:
-      - name: l1
+      - name: l1rel
         weight: -1
         args: base, run
       - name: prule
